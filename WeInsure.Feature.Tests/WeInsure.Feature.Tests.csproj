@@ -21,4 +21,8 @@
         <Using Include="Xunit"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\WeInsure.API\WeInsure.API.csproj" />
+    </ItemGroup>
+
 </Project>
