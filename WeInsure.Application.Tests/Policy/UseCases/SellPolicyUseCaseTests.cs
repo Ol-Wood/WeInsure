@@ -1,4 +1,7 @@
 using AutoFixture;
+using FluentValidation;
+using FluentValidation.Results;
+using NSubstitute;
 using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.UseCases;
 using WeInsure.Application.Tests.AutoFixture;
@@ -13,7 +16,9 @@ public class SellPolicyUseCaseTests
     public async Task SellPolicy_ShouldReturnResultValidationError_IfCommandValidationFails()
     {
         var command = new WeInsureFixture().Create<SellPolicyCommand>();
-        var useCase = new SellPolicyUseCase();
+        var validator = Substitute.For<IValidator<SellPolicyCommand>>();
+        validator.ValidateAsync(command).Returns(new ValidationResult([new ValidationFailure("", "")]));
+        var useCase = new SellPolicyUseCase(validator);
         
         var result = await useCase.Execute(command);
         
