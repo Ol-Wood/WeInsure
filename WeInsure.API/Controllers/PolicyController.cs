@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using WeInsure.API.Models.Policy;
+using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.UseCases.Interfaces;
 
 namespace WeInsure.API.Controllers;
@@ -8,8 +9,15 @@ namespace WeInsure.API.Controllers;
 [ApiController]
 public class PolicyController(ISellPolicyUseCase sellPolicyUseCase) : ControllerBase
 {
-    public async Task<ActionResult> SellPolicy(SellPolicyRequest request)
+    
+    [HttpPost("sell")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> SellPolicy([FromBody] SellPolicyRequest request)
     {
-        throw new NotImplementedException();
+        var command = new SellPolicyCommand();
+        
+        var result = await sellPolicyUseCase.Execute(command);
+        
+        return Ok(result);
     }
 }

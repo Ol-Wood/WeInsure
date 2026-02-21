@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using WeInsure.API.Controllers;
 using WeInsure.API.Models.Policy;
+using WeInsure.Application.Policy.Commands;
+using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases.Interfaces;
 
 namespace WeInSure.API.Tests.Controllers;
@@ -18,12 +20,19 @@ public class PolicyControllerTests
     
 
     [Fact]
-    public async Task SellPolicy_Returns200Ok_WhenCreationSuccessful()
+    public async Task SellPolicy_Returns200WithCreatedPolicyInfo_WhenCreationSuccessful()
     {
-        var request = new SellPolicyRequest();
+        var policyId = Guid.NewGuid();
+        var policyReference = Guid.NewGuid().ToString();
+        var sellPolicyResultDto = new SellPolicyResultDto(policyId, policyReference);
+        _sellPolicyUseCase.Execute(Arg.Any<SellPolicyCommand>()).Returns(sellPolicyResultDto);
 
-        var result = await _policyController.SellPolicy(request);
+        var result = await _policyController.SellPolicy(new SellPolicyRequest());
         
-        Assert.IsType<OkObjectResult>(result);
+        var expectedResponse = new SellPolicyResultDto(policyId, policyReference);
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(expectedResponse, okResult.Value);
     }
 }
+
+
