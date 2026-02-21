@@ -3,6 +3,7 @@ using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases.Interfaces;
 using WeInsure.Domain.Shared;
+using WeInsure.Domain.ValueObjects;
 
 namespace WeInsure.Application.Policy.UseCases;
 
@@ -23,6 +24,19 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
             return Result<SoldPolicy>.Failure(Error.Domain("Policy start date can't be more than 60 days in the future")); 
         }
         
+        var policyHolders = command.PolicyHolders
+            .Select(ph => new PolicyHolder(ph.FirstName, ph.LastName, ph.DateOfBirth))
+            .ToArray();
+
+        var payment = new Payment(command.Payment.Amount, command.Payment.PaymentType,
+            command.Payment.PaymentReference);
+        
+        var policy = Domain.Entities.Policy.Create("Ref", command.StartDate, policyHolders, payment);
+
+        if (!policy.IsSuccess)
+        {
+            return Result<SoldPolicy>.Failure(policy.Error!);
+        }
         
         throw new NotImplementedException();
     }
