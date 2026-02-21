@@ -1,6 +1,6 @@
 using AutoFixture;
 
-namespace WeInsure.Application.Tests.AutoFixture;
+namespace TestUtils.AutoFixture;
 
 public class WeInsureFixture : Fixture
 {

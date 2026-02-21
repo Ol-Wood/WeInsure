@@ -21,11 +21,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Entities\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\WeInsure.Domain\WeInsure.Domain.csproj" />
+      <ProjectReference Include="..\WeInsure.TestUtils\WeInsure.TestUtils.csproj" />
     </ItemGroup>
 
 </Project>

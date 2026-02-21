@@ -23,6 +23,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\WeInsure.Application\WeInsure.Application.csproj" />
+      <ProjectReference Include="..\WeInsure.TestUtils\WeInsure.TestUtils.csproj" />
     </ItemGroup>
 
 </Project>

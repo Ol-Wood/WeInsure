@@ -2,10 +2,10 @@ using AutoFixture;
 using FluentValidation;
 using FluentValidation.Results;
 using NSubstitute;
+using TestUtils.AutoFixture;
 using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases;
-using WeInsure.Application.Tests.AutoFixture;
 using WeInsure.Domain.Shared;
 
 namespace WeInsure.Application.Tests.Policy.UseCases;
@@ -97,4 +97,5 @@ public class SellPolicyUseCaseTests
         Assert.Equal(ErrorType.Domain, result.Error.Type);
         Assert.Equal("There can only be a maximum of 3 policy holders", result.Error.Message);
     }
+
 }

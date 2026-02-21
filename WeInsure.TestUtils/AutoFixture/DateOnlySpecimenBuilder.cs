@@ -1,7 +1,7 @@
 using AutoFixture;
 using AutoFixture.Kernel;
 
-namespace WeInsure.Application.Tests.AutoFixture;
+namespace TestUtils.AutoFixture;
 
 public class DateOnlySpecimenBuilder : ISpecimenBuilder
 {
