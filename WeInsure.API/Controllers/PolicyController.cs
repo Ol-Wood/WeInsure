@@ -15,6 +15,6 @@ public class PolicyController(ISellPolicyUseCase sellPolicyUseCase) : Controller
     {
         var result = await sellPolicyUseCase.Execute(command);
         
-        return Ok(result);
+        return Ok(result.Data);
     }
 }

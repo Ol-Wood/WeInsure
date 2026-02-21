@@ -5,6 +5,7 @@ using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases.Interfaces;
 using WeInsure.Domain.Enums;
+using WeInsure.Domain.Shared;
 
 namespace WeInSure.API.Tests.Controllers;
 
@@ -43,12 +44,12 @@ public class PolicyControllerTests
             }]
         };
         
-        var sellPolicyResultDto = new SellPolicyResultDto(policyId, policyReference);
-        _sellPolicyUseCase.Execute(command).Returns(sellPolicyResultDto);
+        var sellPolicyResultDto = new SoldPolicy(policyId, policyReference);
+        _sellPolicyUseCase.Execute(command).Returns(Result<SoldPolicy>.Success(sellPolicyResultDto));
 
         var result = await _policyController.SellPolicy(command);
         
-        var expectedResponse = new SellPolicyResultDto(policyId, policyReference);
+        var expectedResponse = new SoldPolicy(policyId, policyReference);
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(expectedResponse, okResult.Value);
     }

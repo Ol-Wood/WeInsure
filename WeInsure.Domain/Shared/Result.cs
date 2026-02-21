@@ -1,38 +1,24 @@
 namespace WeInsure.Domain.Shared;
 
-public class Result<T>
-{
-    public T? Data { get; private set; }
-    public Error? Error { get; private set; }
-    private Result(){}
 
-    public static Result<T> Success(T value)
-    {
-        return new Result<T> { Data = value };
-    }
-
-    public static Result<T> Failure(Error error)
-    {
-        return new Result<T> { Error = error };
-    }
-    
-    public bool IsSuccess => Data != null && Error == null;
-}
 
 public class Result
 {
-    public Error? Error { get; private set; }
-    private Result(){}
+    private readonly bool _isSuccess;
+    protected Result(bool isSuccess) => _isSuccess = isSuccess;
+    public Error? Error { get; protected init; }
+    public static Result Success() => new(true);
+    public static Result<T> Success<T>(T value) => Result<T>.Success(value);
+    public static Result Failure(Error error) => new(false) { Error = error };
+    public static Result<T> Failure<T>(Error error) => Result<T>.Failure(error);
+    public virtual bool IsSuccess => _isSuccess && Error == null;
+}
 
-    public static Result Success()
-    {
-        return new Result();
-    }
+public class Result<T> : Result
+{
+    private Result(bool isSuccess) : base(isSuccess) { }
+    public T? Data { get; private init; }
+    public static Result<T> Success(T value) => new(true) { Data = value };
+    public new static Result<T> Failure(Error error) => new(false) { Error = error };
 
-    public static Result Failure(Error error)
-    {
-        return new Result { Error = error };
-    }
-    
-    public bool IsSuccess => Error == null;
 }

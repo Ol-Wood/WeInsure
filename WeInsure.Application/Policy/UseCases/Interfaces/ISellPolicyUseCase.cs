@@ -1,9 +1,10 @@
 using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
+using WeInsure.Domain.Shared;
 
 namespace WeInsure.Application.Policy.UseCases.Interfaces;
 
 public interface ISellPolicyUseCase
 {
-    Task<SellPolicyResultDto> Execute(SellPolicyCommand command);
+    Task<Result<SoldPolicy>> Execute(SellPolicyCommand command);
 }
