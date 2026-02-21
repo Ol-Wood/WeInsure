@@ -20,4 +20,8 @@
         <Using Include="Xunit"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\WeInsure.Application\WeInsure.Application.csproj" />
+    </ItemGroup>
+
 </Project>
