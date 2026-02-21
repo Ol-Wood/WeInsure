@@ -3,6 +3,7 @@ using WeInsure.API.Controllers;
 using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases;
+using WeInsure.Application.Policy.Validators;
 using WeInsure.Domain.Enums;
 
 namespace WeInsure.Feature.Tests.Policy.SellPolicy;
@@ -12,7 +13,8 @@ public class SellPolicyFeatureTests
     private readonly PolicyController _controller;
     public SellPolicyFeatureTests()
     {
-        var sellPolicyUseCase = new SellPolicyUseCase();
+        var validator = new SellPolicyCommandValidator();
+        var sellPolicyUseCase = new SellPolicyUseCase(validator);
         _controller = new PolicyController(sellPolicyUseCase);
     }
     
