@@ -1,3 +1,5 @@
+using WeInsure.Domain.Shared;
+
 namespace WeInsure.Domain.ValueObjects;
 
 public record Money
@@ -10,9 +12,17 @@ public record Money
         Amount = amount;
     }
 
-    public static Money Create(decimal amount)
+    public static Result<Money> Create(decimal amount)
     {
-        return new Money(amount);
+        if (amount < 0)
+        {
+            return Result<Money>.Failure(Error.Domain("Amount cannot be negative."));
+        }
+
+        if (decimal.Round(amount, 2) != amount)
+            return Result<Money>.Failure(Error.Domain("Amount cannot have more than 2 decimal places."));
+        
+        return Result<Money>.Success(new Money(amount));
     }
     
 }

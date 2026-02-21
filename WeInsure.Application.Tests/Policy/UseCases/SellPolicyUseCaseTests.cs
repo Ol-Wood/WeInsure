@@ -52,6 +52,28 @@ public class SellPolicyUseCaseTests
         Assert.Equal(ErrorType.Domain, result.Error.Type);
         Assert.Equal("Policy start date can't be more than 60 days in the future", result.Error.Message);
     }
+    
+    [Fact]
+    public async Task SellPolicy_ShouldReturnDomainError_IfPolicyPriceAmountIsNotValid()
+    {
+        var command = new WeInsureFixture()
+            .Build<SellPolicyCommand>()
+            .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
+            .With(x =>x.PolicyHolders, [])
+            .With(x => x.Amount, 2.789m)
+            .Create();
+        
+        var validator = Substitute.For<IValidator<SellPolicyCommand>>();
+        validator.ValidateAsync(command).Returns(new ValidationResult());
+        var useCase = new SellPolicyUseCase(validator);
+        
+        var result = await useCase.Execute(command);
+        
+        Assert.Null(result.Data);
+        Assert.NotNull(result.Error);
+        Assert.Equal(ErrorType.Domain, result.Error.Type);
+        Assert.Equal("Amount cannot have more than 2 decimal places.", result.Error.Message);
+    }
 
 
     [Fact]

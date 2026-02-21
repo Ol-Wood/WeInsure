@@ -33,9 +33,13 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
             command.Payment.PaymentType,
             command.Payment.PaymentReference);
         
-        var moneyAmount = Money.Create(payment.Amount);
+        var policyPrice = Money.Create(command.Amount);
+        if (!policyPrice.IsSuccess)
+        {
+            return Result<SoldPolicy>.Failure(policyPrice.Error!);
+        }
         
-        var policy = Domain.Entities.Policy.Create("Ref", command.StartDate, policyHolders, payment, moneyAmount);
+        var policy = Domain.Entities.Policy.Create("Ref", command.StartDate, policyHolders, payment, policyPrice.Data!);
 
         if (!policy.IsSuccess)
         {
