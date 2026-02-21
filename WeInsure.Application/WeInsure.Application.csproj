@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\WeInsure.Domain\WeInsure.Domain.csproj" />
+    </ItemGroup>
+
 </Project>

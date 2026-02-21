@@ -12,10 +12,12 @@
 
     <ItemGroup>
       <Folder Include="Models\" />
+      <Folder Include="Models\Policy\" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\WeInsure.Application\WeInsure.Application.csproj" />
+      <ProjectReference Include="..\WeInsure.Domain\WeInsure.Domain.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using WeInsure.API.Controllers;
-using WeInsure.API.Models.Policy;
 using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases.Interfaces;
+using WeInsure.Domain.Enums;
 
 namespace WeInSure.API.Tests.Controllers;
 
@@ -24,10 +24,29 @@ public class PolicyControllerTests
     {
         var policyId = Guid.NewGuid();
         var policyReference = Guid.NewGuid().ToString();
+        var command = new SellPolicyCommand
+        {
+            Amount = 100,
+            PolicyType = PolicyType.Household,
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+            Payment = new PaymentDto
+            {
+                PaymentReference = "PayRef123",
+                Amount = 100,
+                PaymentType = PaymentType.Card
+            },
+            PolicyHolders = [new PolicyHolderDto
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                DateOfBirth = DateOnly.FromDateTime(new DateTime(1990, 1, 1)),
+            }]
+        };
+        
         var sellPolicyResultDto = new SellPolicyResultDto(policyId, policyReference);
-        _sellPolicyUseCase.Execute(Arg.Any<SellPolicyCommand>()).Returns(sellPolicyResultDto);
+        _sellPolicyUseCase.Execute(command).Returns(sellPolicyResultDto);
 
-        var result = await _policyController.SellPolicy(new SellPolicyRequest());
+        var result = await _policyController.SellPolicy(command);
         
         var expectedResponse = new SellPolicyResultDto(policyId, policyReference);
         var okResult = Assert.IsType<OkObjectResult>(result);
