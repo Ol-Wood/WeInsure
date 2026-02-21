@@ -19,7 +19,19 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
             return Result<SoldPolicy>.Failure(Error.Validation("error"));
         }
         
-        if (IsPolicyStartDateValid(command))
+        var policyPrice = Money.Create(command.Amount);
+        if (!policyPrice.IsSuccess)
+        {
+            return Result<SoldPolicy>.Failure(policyPrice.Error);
+        }
+        
+        var paidPrice = Money.Create(command.Payment.Amount);
+        if (!paidPrice.IsSuccess)
+        {
+            return Result<SoldPolicy>.Failure(paidPrice.Error);
+        }
+        
+        if (IsPolicyStartDateTooFarInAdvance(command))
         {
             return Result<SoldPolicy>.Failure(Error.Domain("Policy start date can't be more than 60 days in the future")); 
         }
@@ -29,28 +41,21 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
             .ToArray();
 
         var payment = new Payment(
-            command.Payment.Amount, 
+            paidPrice.Data, 
             command.Payment.PaymentType,
             command.Payment.PaymentReference);
-        
-        var policyPrice = Money.Create(command.Amount);
-        if (!policyPrice.IsSuccess)
-        {
-            return Result<SoldPolicy>.Failure(policyPrice.Error!);
-        }
-        
-        var policy = Domain.Entities.Policy.Create("Ref", command.StartDate, policyHolders, payment, policyPrice.Data!);
 
+        var policy = Domain.Entities.Policy.Create("Ref", command.StartDate, policyHolders, payment, policyPrice.Data);
         if (!policy.IsSuccess)
         {
-            return Result<SoldPolicy>.Failure(policy.Error!);
+            return Result<SoldPolicy>.Failure(policy.Error);
         }
         
         throw new NotImplementedException();
     }
 
 
-    private static bool IsPolicyStartDateValid(SellPolicyCommand command)
+    private static bool IsPolicyStartDateTooFarInAdvance(SellPolicyCommand command)
     {
         var maximumAdvanceStartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(PolicyMaxDaysInAdvance));
         return command.StartDate >= maximumAdvanceStartDate;
