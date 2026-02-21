@@ -47,6 +47,28 @@ public class PolicyTests
         Assert.Equal("Policy must have at least 1 policy holder and no more than 3.", policy.Error.Message);
     }
 
+
+    [Fact]
+    public void Policy_Create_ShouldReturnDomainError_WhenAnyPolicyHolderIsNotEligibleAge()
+    {
+        var startDate = DateOnly.FromDateTime(new DateTime(2000, 1, 1));
+        var eligiblePolicyHolder = new PolicyHolder("John", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 1)));
+        var unEligiblePolicyHolder = new PolicyHolder("Jane", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 2)));
+        var policyHolders = new[]
+        {
+           eligiblePolicyHolder,
+           unEligiblePolicyHolder
+        };
+          
+        var payment = new Payment(CreateMoney(20), PaymentType.Card, "pay-ref");
+        var policy = Policy.Create("Ref", startDate, policyHolders, payment, CreateMoney(20));
+        
+        Assert.False(policy.IsSuccess);
+        Assert.Null(policy.Data);
+        Assert.Equal(ErrorType.Domain, policy.Error.Type);
+        Assert.Equal("All policy holders must be at least 16 years of age by the policy start date.", policy.Error.Message);
+    }
+
     private static Money CreateMoney(decimal amount)
     {
         return Money.Create(amount).Data!;
