@@ -22,6 +22,11 @@
 
     <ItemGroup>
       <Folder Include="Entities\" />
+      <Folder Include="ValueObjects\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\WeInsure.Domain\WeInsure.Domain.csproj" />
     </ItemGroup>
 
 </Project>

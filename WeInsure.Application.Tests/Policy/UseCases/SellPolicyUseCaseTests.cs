@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using NSubstitute;
 using WeInsure.Application.Policy.Commands;
+using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases;
 using WeInsure.Application.Tests.AutoFixture;
 using WeInsure.Domain.Shared;
@@ -50,5 +51,28 @@ public class SellPolicyUseCaseTests
         Assert.NotNull(result.Error);
         Assert.Equal(ErrorType.Domain, result.Error.Type);
         Assert.Equal("Policy start date can't be more than 60 days in the future", result.Error.Message);
+    }
+
+
+    [Fact]
+    public async Task SellPolicy_ShouldReturnResultDomainError_IfPolicyCreationCausesDomainError()
+    {
+        var tooManyPolicyHolders = new WeInsureFixture().CreateMany<PolicyHolderDto>(4);
+        var command = new WeInsureFixture()
+            .Build<SellPolicyCommand>()
+            .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
+            .With(x =>x.PolicyHolders, tooManyPolicyHolders.ToList())
+            .Create();
+        
+        var validator = Substitute.For<IValidator<SellPolicyCommand>>();
+        validator.ValidateAsync(command).Returns(new ValidationResult());
+        var useCase = new SellPolicyUseCase(validator);
+        
+        var result = await useCase.Execute(command);
+        
+        Assert.Null(result.Data);
+        Assert.NotNull(result.Error);
+        Assert.Equal(ErrorType.Domain, result.Error.Type);
+        Assert.Equal("There can only be a maximum of 3 policy holders", result.Error.Message);
     }
 }
