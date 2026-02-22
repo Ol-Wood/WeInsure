@@ -5,6 +5,9 @@ namespace WeInsure.Domain.Tests.Entities;
 
 public class PolicyHolderTests
 {
+    
+    private readonly Guid _policyHolderId = Guid.CreateVersion7();
+    private readonly Guid _policyId = Guid.CreateVersion7();
 
     [Theory]
     [InlineData(null)]
@@ -15,7 +18,7 @@ public class PolicyHolderTests
         var lastName = "Doe";
         var dateOfBirth = DateOnly.FromDateTime(new DateTime(1984, 1, 1));
 
-        var result = PolicyHolder.Create(Guid.CreateVersion7(), firstName, lastName, dateOfBirth);
+        var result = PolicyHolder.Create(_policyHolderId, _policyId, firstName, lastName, dateOfBirth);
 
         Assert.False(result.IsSuccess);
         Assert.Null(result.Data);
@@ -32,7 +35,7 @@ public class PolicyHolderTests
         var firstName = "John";
         var dateOfBirth = DateOnly.FromDateTime(new DateTime(1984, 1, 1));
 
-        var result = PolicyHolder.Create(Guid.CreateVersion7(), firstName, lastName, dateOfBirth);
+        var result = PolicyHolder.Create(_policyHolderId, _policyId,firstName, lastName, dateOfBirth);
 
         Assert.False(result.IsSuccess);
         Assert.Null(result.Data);
@@ -47,7 +50,7 @@ public class PolicyHolderTests
         var lastName = "Doe";
         var dateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
 
-        var result = PolicyHolder.Create(Guid.CreateVersion7(), firstName, lastName, dateOfBirth);
+        var result = PolicyHolder.Create(_policyHolderId, _policyId, firstName, lastName, dateOfBirth);
 
         Assert.False(result.IsSuccess);
         Assert.Null(result.Data);
@@ -62,7 +65,7 @@ public class PolicyHolderTests
         var lastName = "Doe";
         var dateOfBirth = DateOnly.FromDateTime(new DateTime(1984, 1, 1));
 
-        var result = PolicyHolder.Create(Guid.CreateVersion7(), firstName, lastName, dateOfBirth);
+        var result = PolicyHolder.Create(_policyHolderId, _policyId, firstName, lastName, dateOfBirth);
 
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Data);

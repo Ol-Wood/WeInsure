@@ -7,8 +7,14 @@ namespace WeInsure.Domain.Tests.Entities;
 
 public class PolicyTests
 {
-    private readonly PolicyHolder _eligiblePolicyHolder = CreatePolicyHolder(new DateOnly(1984, 1, 1));
+    private readonly PolicyHolder _eligiblePolicyHolder;
     private readonly Guid _policyId = Guid.CreateVersion7();
+
+
+    public PolicyTests()
+    {
+        _eligiblePolicyHolder =  CreatePolicyHolder(new DateOnly(1984, 1, 1));
+    }
 
     [Fact]
     public void Policy_Create_ShouldReturnDomainError_WhenThereIsNoPolicyHolder()
@@ -21,7 +27,7 @@ public class PolicyTests
             startDate, policyHolders, 
             CreateMoney(20), 
             CreateAddress(), 
-            CreatePayment(_policyId));
+            CreatePayment());
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -44,7 +50,7 @@ public class PolicyTests
             policyHolders, 
             CreateMoney(20),
             CreateAddress(),
-            CreatePayment(_policyId));
+            CreatePayment());
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -57,7 +63,7 @@ public class PolicyTests
     public void Policy_Create_ShouldReturnDomainError_WhenAnyPolicyHolderIsNotEligibleAge()
     {
         var startDate = DateOnly.FromDateTime(new DateTime(2000, 1, 1));
-        var unEligiblePolicyHolder = PolicyHolder.Create(Guid.CreateVersion7(),"Jane", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 2))).Data!;
+        var unEligiblePolicyHolder = PolicyHolder.Create(Guid.CreateVersion7(), _policyId,"Jane", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 2))).Data!;
         var policyHolders = new[]
         {
             _eligiblePolicyHolder,
@@ -71,7 +77,7 @@ public class PolicyTests
             policyHolders, 
             CreateMoney(20),
             CreateAddress(),
-            CreatePayment(_policyId));
+            CreatePayment());
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -95,7 +101,7 @@ public class PolicyTests
             policyHolders, 
             CreateMoney(20),
             CreateAddress(),
-            CreatePayment(_policyId));
+            CreatePayment());
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -109,9 +115,9 @@ public class PolicyTests
         return Money.Create(amount).Data!;
     }
 
-    private static PolicyHolder CreatePolicyHolder(DateOnly? dateOfBirth = null)
+    private PolicyHolder CreatePolicyHolder(DateOnly? dateOfBirth = null)
     {
-       return  PolicyHolder.Create(Guid.CreateVersion7(), "John", "Doe", dateOfBirth ?? new DateOnly(1990,1,1)).Data!;
+       return  PolicyHolder.Create(Guid.CreateVersion7(), _policyId,"John", "Doe", dateOfBirth ?? new DateOnly(1990,1,1)).Data!;
     }
 
     private static Address CreateAddress()
@@ -119,8 +125,8 @@ public class PolicyTests
         return Address.Create("123 Main Street", "New York", "USA", "12345").Data!;
     }
 
-    private static Payment CreatePayment(Guid policyId)
+    private Payment CreatePayment()
     {
-        return Payment.Create(Guid.CreateVersion7(), policyId, PaymentType.Card, CreateMoney(20), "REF").Data!;
+        return Payment.Create(Guid.CreateVersion7(), _policyId, PaymentType.Card, CreateMoney(20), "REF").Data!;
     }
 }

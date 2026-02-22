@@ -44,7 +44,7 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
             return Result<SoldPolicy>.Failure(address.Error);
         }
 
-        var policyHolders = CreatePolicyHolders(command);
+        var policyHolders = CreatePolicyHolders(command, policyId);
         if (!policyHolders.IsSuccess)
         {
             return Result<SoldPolicy>.Failure(policyHolders.Error);
@@ -78,13 +78,14 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
     }
 
 
-    private Result<PolicyHolder[]> CreatePolicyHolders(SellPolicyCommand command)
+    private Result<PolicyHolder[]> CreatePolicyHolders(SellPolicyCommand command, Guid policyId)
     {
         var policyHolders = new List<PolicyHolder>();
         foreach (var holderDto in command.PolicyHolders)
         {
             var holder = PolicyHolder.Create(
                 idGenerator.Generate(),
+                policyId,
                 holderDto.FirstName, 
                 holderDto.LastName, 
                 holderDto.DateOfBirth);
