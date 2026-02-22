@@ -41,7 +41,7 @@ public class SellPolicyUseCaseTests
     {
         _validator.ValidateAsync(Arg.Any<SellPolicyCommand>()).Returns(new ValidationResult());
         _idGenerator.Generate().Returns(_policyId);
-        _useCase = new SellPolicyUseCase(_validator, _idGenerator);
+        _useCase = new SellPolicyUseCase(_validator, _idGenerator, _policyRepository);
     }
 
     [Fact]
@@ -186,14 +186,19 @@ public class SellPolicyUseCaseTests
             .With(x => x.PolicyType, PolicyType.Household)
             .Create();
 
-        await _useCase.Execute(command);
+        var result = await _useCase.Execute(command);
 
-        await _policyRepository.Add(Arg.Is<Domain.Entities.Policy>(x =>
+        await _policyRepository.Received().Add(Arg.Is<Domain.Entities.Policy>(x =>
             x.Id == _policyId &&
             x.StartDate == command.StartDate &&
             x.Price == Money.Create(command.Amount).Data &&
             x.PolicyHolders.Count == command.PolicyHolders.Count &&
             x.InsuredProperty.Address.AddressLine1 == command.PolicyAddress.AddressLine1
         ));
+        
+        Assert.True(result.IsSuccess);
+        Assert.Null(result.Error);
+        Assert.Equal(_policyId, result.Data.PolicyId);
+        Assert.Equal("Ref", result.Data.PolicyReference);
     }
 }

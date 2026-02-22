@@ -4,13 +4,17 @@ using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases.Interfaces;
 using WeInsure.Application.Services;
 using WeInsure.Domain.Entities;
+using WeInsure.Domain.Repositories;
 using WeInsure.Domain.Shared;
 using WeInsure.Domain.ValueObjects;
 using PolicyEntity = WeInsure.Domain.Entities.Policy;
 
 namespace WeInsure.Application.Policy.UseCases;
 
-public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGenerator idGenerator) : ISellPolicyUseCase
+public class SellPolicyUseCase(
+    IValidator<SellPolicyCommand> validator,
+    IIdGenerator idGenerator,
+    IPolicyRepository policyRepository) : ISellPolicyUseCase
 {
     public async Task<Result<SoldPolicy>> Execute(SellPolicyCommand command)
     {
@@ -19,30 +23,31 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
         {
             return Result<SoldPolicy>.Failure(Error.Validation("error"));
         }
-        
+
         var policyPrice = Money.Create(command.Amount);
         if (!policyPrice.IsSuccess)
         {
             return Result<SoldPolicy>.Failure(policyPrice.Error);
         }
-        
+
         var paidPrice = Money.Create(command.Payment.Amount);
         if (!paidPrice.IsSuccess)
         {
             return Result<SoldPolicy>.Failure(paidPrice.Error);
         }
-        
+
         var policyId = idGenerator.Generate();
-        
+
         var address = Address.Create(
-            command.PolicyAddress.AddressLine1, 
-            command.PolicyAddress.AddressLine2, 
-            command.PolicyAddress.AddressLine3, 
+            command.PolicyAddress.AddressLine1,
+            command.PolicyAddress.AddressLine2,
+            command.PolicyAddress.AddressLine3,
             command.PolicyAddress.PostCode);
         if (!address.IsSuccess)
         {
             return Result<SoldPolicy>.Failure(address.Error);
         }
+
         var property = InsuredProperty.Create(idGenerator.Generate(), policyId, address.Data);
 
         var policyHolders = CreatePolicyHolders(command, policyId);
@@ -50,24 +55,24 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
         {
             return Result<SoldPolicy>.Failure(policyHolders.Error);
         }
-        
+
         var payment = Payment.Create(
-            idGenerator.Generate(), 
+            idGenerator.Generate(),
             policyId,
-            command.Payment.PaymentType, 
-            paidPrice.Data, 
+            command.Payment.PaymentType,
+            paidPrice.Data,
             command.Payment.PaymentReference);
         if (!payment.IsSuccess)
         {
             return Result<SoldPolicy>.Failure(payment.Error);
         }
-        
+
         var policy = PolicyEntity.Create(
             policyId,
-            "Ref", 
-            command.StartDate, 
+            "Ref",
+            command.StartDate,
             command.PolicyType,
-            policyHolders.Data, 
+            policyHolders.Data,
             policyPrice.Data,
             property,
             payment.Data);
@@ -76,7 +81,9 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
             return Result<SoldPolicy>.Failure(policy.Error);
         }
         
-        throw new NotImplementedException();
+        await policyRepository.Add(policy.Data);
+
+        return Result.Success(new SoldPolicy(policyId, "Ref"));
     }
 
 
@@ -88,19 +95,18 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
             var holder = PolicyHolder.Create(
                 idGenerator.Generate(),
                 policyId,
-                holderDto.FirstName, 
-                holderDto.LastName, 
+                holderDto.FirstName,
+                holderDto.LastName,
                 holderDto.DateOfBirth);
 
             if (!holder.IsSuccess)
             {
                 return Result<PolicyHolder[]>.Failure(holder.Error);
             }
-           
+
             policyHolders.Add(holder.Data);
         }
-        
+
         return Result<PolicyHolder[]>.Success(policyHolders.ToArray());
     }
-    
 }
