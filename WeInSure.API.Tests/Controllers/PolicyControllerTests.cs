@@ -29,7 +29,14 @@ public class PolicyControllerTests
             FirstName = "John",
             LastName = "Doe",
             DateOfBirth = DateOnly.FromDateTime(new DateTime(1990, 1, 1)),
-        }]
+        }],
+        PolicyAddress = new AddressDto
+        {
+            AddressLine1 = "AddressLine1",
+            AddressLine2 = "AddressLine2",
+            AddressLine3 = "AddressLine3",
+            PostCode = "PostCode",
+        }
     };
 
     public PolicyControllerTests()

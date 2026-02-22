@@ -10,4 +10,5 @@ public record SellPolicyCommand
     public decimal Amount { get; init; }
     public required IReadOnlyList<PolicyHolderDto> PolicyHolders { get; init; }
     public required PaymentDto Payment { get; init; }
+    public required AddressDto PolicyAddress { get; init; }
 }
