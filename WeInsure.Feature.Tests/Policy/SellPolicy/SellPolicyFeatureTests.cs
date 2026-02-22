@@ -4,6 +4,7 @@ using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases;
 using WeInsure.Application.Policy.Validators;
+using WeInsure.Application.Services;
 using WeInsure.Domain.Enums;
 
 namespace WeInsure.Feature.Tests.Policy.SellPolicy;
@@ -14,7 +15,7 @@ public class SellPolicyFeatureTests
     public SellPolicyFeatureTests()
     {
         var validator = new SellPolicyCommandValidator();
-        var sellPolicyUseCase = new SellPolicyUseCase(validator);
+        var sellPolicyUseCase = new SellPolicyUseCase(validator, new IdGenerator());
         _controller = new PolicyController(sellPolicyUseCase);
     }
     
