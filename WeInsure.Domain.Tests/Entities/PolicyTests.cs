@@ -15,7 +15,7 @@ public class PolicyTests
     // Auto renewal policies can't use cheque
 
     private readonly PolicyHolder _eligiblePolicyHolder =
-        PolicyHolder.Create("John", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 1)));
+        PolicyHolder.Create("John", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 1))).Data!;
 
 
     [Fact]
@@ -52,7 +52,7 @@ public class PolicyTests
     public void Policy_Create_ShouldReturnDomainError_WhenAnyPolicyHolderIsNotEligibleAge()
     {
         var startDate = DateOnly.FromDateTime(new DateTime(2000, 1, 1));
-        var unEligiblePolicyHolder = PolicyHolder.Create("Jane", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 2)));
+        var unEligiblePolicyHolder = PolicyHolder.Create("Jane", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 2))).Data!;
         var policyHolders = new[]
         {
             _eligiblePolicyHolder,

@@ -1,3 +1,5 @@
+using WeInsure.Domain.Shared;
+
 namespace WeInsure.Domain.Entities;
 
 public record PolicyHolder
@@ -15,8 +17,23 @@ public record PolicyHolder
     public DateOnly DateOfBirth { get; set; }
 
 
-    public static PolicyHolder Create(string firstName, string lastName, DateOnly dateOfBirth)
+    public static Result<PolicyHolder> Create(string firstName, string lastName, DateOnly dateOfBirth)
     {
-        return new PolicyHolder(firstName, lastName, dateOfBirth);
+        if (string.IsNullOrWhiteSpace(firstName))
+        {
+            return Result.Failure<PolicyHolder>(Error.Domain("Policy holder first name is required."));
+        }
+
+        if (string.IsNullOrWhiteSpace(lastName))
+        {
+            return Result.Failure<PolicyHolder>(Error.Domain("Policy holder last name is required."));
+        }
+
+        if (dateOfBirth > DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            return Result.Failure<PolicyHolder>(Error.Domain("Policy holder date of birth cannot be in the future."));
+        }
+
+        return Result.Success(new PolicyHolder(firstName, lastName, dateOfBirth));
     }
 }
