@@ -26,7 +26,7 @@ public class PolicyTests
             "Ref",
             startDate, policyHolders, 
             CreateMoney(20), 
-            CreateAddress(), 
+            CreateInsuredProperty(), 
             CreatePayment());
         
         Assert.False(policy.IsSuccess);
@@ -49,7 +49,7 @@ public class PolicyTests
             startDate,
             policyHolders, 
             CreateMoney(20),
-            CreateAddress(),
+            CreateInsuredProperty(),
             CreatePayment());
         
         Assert.False(policy.IsSuccess);
@@ -76,7 +76,7 @@ public class PolicyTests
             startDate, 
             policyHolders, 
             CreateMoney(20),
-            CreateAddress(),
+            CreateInsuredProperty(),
             CreatePayment());
         
         Assert.False(policy.IsSuccess);
@@ -100,7 +100,7 @@ public class PolicyTests
             startDate, 
             policyHolders, 
             CreateMoney(20),
-            CreateAddress(),
+            CreateInsuredProperty(),
             CreatePayment());
         
         Assert.False(policy.IsSuccess);
@@ -120,9 +120,10 @@ public class PolicyTests
        return  PolicyHolder.Create(Guid.CreateVersion7(), _policyId,"John", "Doe", dateOfBirth ?? new DateOnly(1990,1,1)).Data!;
     }
 
-    private static Address CreateAddress()
+    private InsuredProperty CreateInsuredProperty()
     {
-        return Address.Create("123 Main Street", "New York", "USA", "12345").Data!;
+        return InsuredProperty.Create(Guid.CreateVersion7(), _policyId,
+            Address.Create("123 Main Street", "New York", "USA", "12345").Data!);
     }
 
     private Payment CreatePayment()

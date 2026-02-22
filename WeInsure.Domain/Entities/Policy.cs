@@ -15,6 +15,7 @@ public class Policy
     public Money Price { get; private set; }
     public string Reference { get; private set; }
     public IReadOnlyCollection<PolicyHolder> PolicyHolders { get; private set; }
+    public InsuredProperty InsuredProperty { get; private set; }
     
     public static Result<Policy> Create(
         Guid id,
@@ -22,7 +23,7 @@ public class Policy
         DateOnly startDate, 
         PolicyHolder[] policyHolders, 
         Money price, 
-        Address address,
+        InsuredProperty insuredInsuredProperty,
         Payment payment)
     {
         if (policyHolders.Length is 0 or > 3)

@@ -43,6 +43,7 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
         {
             return Result<SoldPolicy>.Failure(address.Error);
         }
+        var property = InsuredProperty.Create(idGenerator.Generate(), policyId, address.Data);
 
         var policyHolders = CreatePolicyHolders(command, policyId);
         if (!policyHolders.IsSuccess)
@@ -67,7 +68,7 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
             command.StartDate, 
             policyHolders.Data, 
             policyPrice.Data,
-            address.Data,
+            property,
             payment.Data);
         if (!policy.IsSuccess)
         {
