@@ -30,8 +30,8 @@ public class Policy
 
     private static bool IsStartDateValid(DateOnly startDate)
     {
-        var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
-        var maximumAdvanceStartDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(PolicyMaxDaysInAdvance);
+        var currentDate = DateOnly.FromDateTime(DateTime.Now);
+        var maximumAdvanceStartDate = currentDate.AddDays(PolicyMaxDaysInAdvance);
         return startDate >= currentDate && startDate <= maximumAdvanceStartDate;
     }
 }

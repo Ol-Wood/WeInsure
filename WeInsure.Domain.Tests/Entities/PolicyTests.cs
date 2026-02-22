@@ -71,10 +71,10 @@ public class PolicyTests
         Assert.Equal("All policy holders must be at least 16 years of age by the policy start date.", policy.Error.Message);
     }
 
-    [Fact]
-    public void Policy_Create_ShouldReturnDomainError_WhenPolicyStartDateExceedsLimit()
+    [Theory]
+    [ClassData(typeof(PolicyInvalidStartDateTestData))]
+    public void Policy_Create_ShouldReturnDomainError_WhenPolicyStartDateExceedsLimit(DateOnly startDate)
     {
-        var startDate = DateOnly.FromDateTime(new DateTime(2000, 1, 1));
         var policyHolders = new[]
         {
             _eligiblePolicyHolder,
