@@ -31,11 +31,6 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
             return Result<SoldPolicy>.Failure(paidPrice.Error);
         }
         
-        if (IsPolicyStartDateTooFarInAdvance(command))
-        {
-            return Result<SoldPolicy>.Failure(Error.Domain("Policy start date can't be more than 60 days in the future")); 
-        }
-        
         var policyHolders = command.PolicyHolders
             .Select(ph => new PolicyHolder(ph.FirstName, ph.LastName, ph.DateOfBirth))
             .ToArray();
@@ -47,13 +42,6 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
         }
         
         throw new NotImplementedException();
-    }
-
-
-    private static bool IsPolicyStartDateTooFarInAdvance(SellPolicyCommand command)
-    {
-        var maximumAdvanceStartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(PolicyMaxDaysInAdvance));
-        return command.StartDate >= maximumAdvanceStartDate;
     }
     
 }
