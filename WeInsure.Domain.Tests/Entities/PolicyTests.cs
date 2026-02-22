@@ -1,7 +1,6 @@
 using AutoFixture;
 using TestUtils.AutoFixture;
 using WeInsure.Domain.Entities;
-using WeInsure.Domain.Enums;
 using WeInsure.Domain.Shared;
 using WeInsure.Domain.ValueObjects;
 
@@ -24,8 +23,7 @@ public class PolicyTests
     {
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
         var policyHolders = Array.Empty<PolicyHolder>();
-        var payment = new Payment(CreateMoney(20), PaymentType.Card, "pay-ref");
-        var policy = Policy.Create("Ref", startDate, policyHolders, payment, CreateMoney(20));
+        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20));
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -41,8 +39,7 @@ public class PolicyTests
     {
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
         var policyHolders = new WeInsureFixture().CreateMany<PolicyHolder>(policyHolderCount).ToArray();
-        var payment = new Payment(CreateMoney(20), PaymentType.Card, "pay-ref");
-        var policy = Policy.Create("Ref", startDate, policyHolders, payment, CreateMoney(20));
+        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20));
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -62,8 +59,7 @@ public class PolicyTests
            unEligiblePolicyHolder
         };
           
-        var payment = new Payment(CreateMoney(20), PaymentType.Card, "pay-ref");
-        var policy = Policy.Create("Ref", startDate, policyHolders, payment, CreateMoney(20));
+        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20));
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -80,8 +76,7 @@ public class PolicyTests
             _eligiblePolicyHolder,
         };
           
-        var payment = new Payment(CreateMoney(20), PaymentType.Card, "pay-ref");
-        var policy = Policy.Create("Ref", startDate, policyHolders, payment, CreateMoney(20));
+        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20));
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);

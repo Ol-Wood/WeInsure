@@ -40,12 +40,7 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
             .Select(ph => new PolicyHolder(ph.FirstName, ph.LastName, ph.DateOfBirth))
             .ToArray();
 
-        var payment = new Payment(
-            paidPrice.Data, 
-            command.Payment.PaymentType,
-            command.Payment.PaymentReference);
-
-        var policy = Domain.Entities.Policy.Create("Ref", command.StartDate, policyHolders, payment, policyPrice.Data);
+        var policy = Domain.Entities.Policy.Create("Ref", command.StartDate, policyHolders, policyPrice.Data);
         if (!policy.IsSuccess)
         {
             return Result<SoldPolicy>.Failure(policy.Error);

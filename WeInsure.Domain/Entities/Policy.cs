@@ -1,3 +1,4 @@
+using WeInsure.Domain.Enums;
 using WeInsure.Domain.Shared;
 using WeInsure.Domain.ValueObjects;
 
@@ -6,7 +7,15 @@ namespace WeInsure.Domain.Entities;
 public class Policy
 {
     private const int PolicyMaxDaysInAdvance = 60;
-    public static Result<Policy> Create(string reference, DateOnly startDate, PolicyHolder[] policyHolders, Payment payment, Money price)
+    
+    public DateOnly StartDate { get; private set; }
+    public DateOnly EndDate { get; private set; }
+    public PolicyType PolicyType { get; private set; }
+    public Money Price { get; private set; }
+    public string Reference { get; private set; }
+    
+    
+    public static Result<Policy> Create(string reference, DateOnly startDate, PolicyHolder[] policyHolders, Money price)
     {
         if (policyHolders.Length is 0 or > 3)
         {
@@ -23,7 +32,6 @@ public class Policy
             return Result<Policy>.Failure(Error.Domain("Policy start date can't be more than 60 days in the future")); 
         }
         
-
         throw new NotImplementedException();
     }
 

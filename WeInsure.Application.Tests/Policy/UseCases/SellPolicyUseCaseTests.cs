@@ -95,7 +95,7 @@ public class SellPolicyUseCaseTests
         Assert.Null(result.Data);
         Assert.NotNull(result.Error);
         Assert.Equal(ErrorType.Domain, result.Error.Type);
-        Assert.Equal("There can only be a maximum of 3 policy holders", result.Error.Message);
+        Assert.Equal("Policy must have at least 1 policy holder and no more than 3.", result.Error.Message);
     }
 
 }
