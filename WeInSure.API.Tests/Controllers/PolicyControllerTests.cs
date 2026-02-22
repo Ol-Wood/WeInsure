@@ -13,7 +13,7 @@ public class PolicyControllerTests
 {
     private readonly ISellPolicyUseCase _sellPolicyUseCase = Substitute.For<ISellPolicyUseCase>();
     private readonly PolicyController _policyController;
-    private readonly SellPolicyCommand _sellPolicyCommand =  new()
+    private readonly SellPolicyCommand _sellPolicyCommand = new()
     {
         Amount = 100,
         PolicyType = PolicyType.Household,

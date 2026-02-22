@@ -40,7 +40,6 @@ public class Policy
         return policyHolder.DateOfBirth.AddYears(16) <= startDate;
     }
 
-
     private static bool IsStartDateValid(DateOnly startDate)
     {
         var currentDate = DateOnly.FromDateTime(DateTime.Now);
