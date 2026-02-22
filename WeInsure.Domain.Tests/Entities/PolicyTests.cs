@@ -14,7 +14,7 @@ public class PolicyTests
     {
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
         var policyHolders = Array.Empty<PolicyHolder>();
-        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20));
+        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20), CreateAddress());
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -30,7 +30,7 @@ public class PolicyTests
     {
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
         var policyHolders = new PolicyHolder[policyHolderCount].Select(_ => CreatePolicyHolder()).ToArray();
-        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20));
+        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20), CreateAddress());
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -50,7 +50,7 @@ public class PolicyTests
            unEligiblePolicyHolder
         };
           
-        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20));
+        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20), CreateAddress());
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -67,7 +67,7 @@ public class PolicyTests
             _eligiblePolicyHolder,
         };
           
-        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20));
+        var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20), CreateAddress());
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -84,5 +84,10 @@ public class PolicyTests
     private static PolicyHolder CreatePolicyHolder(DateOnly? dateOfBirth = null)
     {
        return  PolicyHolder.Create("John", "Doe", dateOfBirth ?? new DateOnly(1990,1,1)).Data!;
+    }
+
+    private static Address CreateAddress()
+    {
+        return Address.Create("123 Main Street", "New York", "USA", "12345").Data!;
     }
 }

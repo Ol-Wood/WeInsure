@@ -47,7 +47,12 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
             return Result<SoldPolicy>.Failure(policyHolders.Error);
         }
         
-        var policy = PolicyEntity.Create("Ref", command.StartDate, policyHolders.Data, policyPrice.Data);
+        var policy = PolicyEntity.Create(
+            "Ref", 
+            command.StartDate, 
+            policyHolders.Data, 
+            policyPrice.Data,
+            address.Data);
         if (!policy.IsSuccess)
         {
             return Result<SoldPolicy>.Failure(policy.Error);
