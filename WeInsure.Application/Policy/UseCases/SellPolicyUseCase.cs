@@ -31,12 +31,15 @@ public class SellPolicyUseCase(
         var paidPrice = Money.Create(command.Payment.Amount).OrThrow();
 
         var addressDto = command.PolicyAddress;
-        var address = Address
-            .Create(addressDto.AddressLine1, addressDto.AddressLine2, addressDto.AddressLine3, addressDto.PostCode)
+        var address = Address.Create(
+                addressDto.AddressLine1,
+                addressDto.AddressLine2,
+                addressDto.AddressLine3,
+                addressDto.PostCode)
             .OrThrow();
 
         var property = InsuredProperty.Create(idGenerator.Generate(), policyId, address);
-        
+
         var policyHolders = CreatePolicyHolders(command, policyId);
         if (!policyHolders.IsSuccess)
         {
@@ -54,9 +57,10 @@ public class SellPolicyUseCase(
             return Result<SoldPolicy>.Failure(payment.Error);
         }
 
+        var policyReference = await policyReferenceGenerator.Generate();
         var policy = PolicyEntity.Create(
             policyId,
-            "Ref",
+            policyReference,
             command.StartDate,
             command.PolicyType,
             policyHolders.Data,
@@ -67,10 +71,10 @@ public class SellPolicyUseCase(
         {
             return Result<SoldPolicy>.Failure(policy.Error);
         }
-        
+
         await policyRepository.Add(policy.Data);
 
-        return Result.Success(new SoldPolicy(policyId, "Ref"));
+        return Result.Success(new SoldPolicy(policyId, policyReference.Value));
     }
 
 

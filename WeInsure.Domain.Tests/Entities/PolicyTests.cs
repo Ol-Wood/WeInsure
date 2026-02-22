@@ -23,7 +23,7 @@ public class PolicyTests
         var policyHolders = Array.Empty<PolicyHolder>();
         var policy = Policy.Create(
             _policyId,
-            "Ref",
+            PolicyReference.Create(),
             startDate, 
             PolicyType.Household,
             policyHolders,
@@ -47,7 +47,7 @@ public class PolicyTests
         var policyHolders = new PolicyHolder[policyHolderCount].Select(_ => CreatePolicyHolder()).ToArray();
         var policy = Policy.Create(
             _policyId,
-            "Ref",
+            PolicyReference.Create(),
             startDate,
             PolicyType.Household,
             policyHolders,
@@ -76,7 +76,7 @@ public class PolicyTests
 
         var policy = Policy.Create(
             _policyId,
-            "Ref",
+            PolicyReference.Create(),
             startDate,
             PolicyType.Household,
             policyHolders,
@@ -102,7 +102,7 @@ public class PolicyTests
 
         var policy = Policy.Create(
             _policyId,
-            "Ref",
+            PolicyReference.Create(),
             startDate,
             PolicyType.Household,
             policyHolders,
@@ -126,7 +126,7 @@ public class PolicyTests
 
         var policy = Policy.Create(
             _policyId,
-            "Ref",
+            PolicyReference.Create(),
             DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
             (PolicyType)99,
             policyHolders,
@@ -147,7 +147,7 @@ public class PolicyTests
     [InlineData(PolicyType.BuyToLet)]
     public void Policy_Create_ShouldReturnPolicy_WhenPolicyIsValid(PolicyType policyType)
     {
-        const string reference = "Ref";
+        var reference = PolicyReference.Create();
         var price = CreateMoney(20);
         var insuredProperty = CreateInsuredProperty();
         var payment = CreatePayment();

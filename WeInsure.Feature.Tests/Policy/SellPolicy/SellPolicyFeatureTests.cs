@@ -20,7 +20,7 @@ public class SellPolicyFeatureTests
     {
         var validator = new SellPolicyCommandValidator();
         var sellPolicyUseCase = new SellPolicyUseCase(validator, new IdGenerator(), _policyRepository,
-            new PolicyReferenceGenerator());
+            new PolicyReferenceGenerator(_policyRepository));
         _controller = new PolicyController(sellPolicyUseCase);
     }
 

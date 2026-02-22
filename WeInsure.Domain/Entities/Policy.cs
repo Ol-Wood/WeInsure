@@ -14,12 +14,12 @@ public class Policy
     public DateOnly EndDate { get; private set; }
     public PolicyType PolicyType { get; private set; }
     public Money Price { get; private set; }
-    public string Reference { get; private set; }
+    public PolicyReference Reference { get; private set; }
     public IReadOnlyCollection<PolicyHolder> PolicyHolders { get; private set; }
     public InsuredProperty InsuredProperty { get; private set; }
     public Payment Payment { get; private set; }
 
-    private Policy(Guid id, string reference, DateOnly startDate, PolicyType policyType, PolicyHolder[] policyHolders,
+    private Policy(Guid id, PolicyReference reference, DateOnly startDate, PolicyType policyType, PolicyHolder[] policyHolders,
         Money price, Payment payment, InsuredProperty insuredProperty)
     {
         Id = id;
@@ -35,7 +35,7 @@ public class Policy
 
     public static Result<Policy> Create(
         Guid id,
-        string reference,
+        PolicyReference reference,
         DateOnly startDate,
         PolicyType policyType,
         PolicyHolder[] policyHolders,

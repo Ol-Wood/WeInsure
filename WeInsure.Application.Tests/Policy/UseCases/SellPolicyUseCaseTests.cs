@@ -18,6 +18,7 @@ namespace WeInsure.Application.Tests.Policy.UseCases;
 public class SellPolicyUseCaseTests
 {
     private readonly Guid _policyId = Guid.CreateVersion7();
+    private readonly PolicyReference _policyReference = PolicyReference.Create();
     private readonly SellPolicyUseCase _useCase;
     private readonly IValidator<SellPolicyCommand> _validator = Substitute.For<IValidator<SellPolicyCommand>>();
     private readonly IIdGenerator _idGenerator = Substitute.For<IIdGenerator>();
@@ -43,6 +44,7 @@ public class SellPolicyUseCaseTests
     {
         _validator.ValidateAsync(Arg.Any<SellPolicyCommand>()).Returns(new ValidationResult());
         _idGenerator.Generate().Returns(_policyId);
+        _policyReferenceGenerator.Generate().Returns(_policyReference);
         _useCase = new SellPolicyUseCase(_validator, _idGenerator, _policyRepository, _policyReferenceGenerator);
     }
 
@@ -199,6 +201,6 @@ public class SellPolicyUseCaseTests
         Assert.True(result.IsSuccess);
         Assert.Null(result.Error);
         Assert.Equal(_policyId, result.Data.PolicyId);
-        Assert.Equal("Ref", result.Data.PolicyReference);
+        Assert.Equal(_policyReference.Value, result.Data.PolicyReference);
     }
 }
