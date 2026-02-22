@@ -13,6 +13,7 @@ public class Policy
     public PolicyType PolicyType { get; private set; }
     public Money Price { get; private set; }
     public string Reference { get; private set; }
+    public IReadOnlyCollection<PolicyHolder> PolicyHolders { get; private set; }
     
     
     public static Result<Policy> Create(string reference, DateOnly startDate, PolicyHolder[] policyHolders, Money price)
@@ -22,7 +23,7 @@ public class Policy
             return Result<Policy>.Failure(Error.Domain("Policy must have at least 1 policy holder and no more than 3."));
         }
         
-        if (policyHolders.Any(ph => ph.DateOfBirth.AddYears(16) > startDate))
+        if (policyHolders.Any(ph => !IsPolicyHolderOldEnough(ph, startDate)))
         {
             return Result<Policy>.Failure(Error.Domain("All policy holders must be at least 16 years of age by the policy start date."));
         }
@@ -33,6 +34,11 @@ public class Policy
         }
         
         throw new NotImplementedException();
+    }
+
+    private static bool IsPolicyHolderOldEnough(PolicyHolder policyHolder, DateOnly startDate)
+    {
+        return policyHolder.DateOfBirth.AddYears(16) <= startDate;
     }
 
 
