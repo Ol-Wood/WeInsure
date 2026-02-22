@@ -36,7 +36,8 @@ public class PolicyControllerTests
             AddressLine2 = "AddressLine2",
             AddressLine3 = "AddressLine3",
             PostCode = "PostCode",
-        }
+        },
+        AutoRenew = false,
     };
 
     public PolicyControllerTests()

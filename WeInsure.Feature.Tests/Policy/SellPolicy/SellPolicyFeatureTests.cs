@@ -44,7 +44,8 @@ public class SellPolicyFeatureTests
                 AddressLine2 = "AddressLine2",
                 AddressLine3 = "AddressLine3",
                 PostCode = "PostCode",
-            }
+            },
+            AutoRenew = false,
         };
         
         var result = await _controller.SellPolicy(command);

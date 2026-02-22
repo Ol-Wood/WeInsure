@@ -11,4 +11,5 @@ public record SellPolicyCommand
     public required IReadOnlyList<PolicyHolderDto> PolicyHolders { get; init; }
     public required PaymentDto Payment { get; init; }
     public required AddressDto PolicyAddress { get; init; }
+    public bool AutoRenew { get; init; }
 }
