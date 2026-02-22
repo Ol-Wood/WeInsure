@@ -49,12 +49,41 @@ public class SellPolicyUseCaseTests
         Assert.Equal(ErrorType.Domain, result.Error.Type);
         Assert.Equal("Amount cannot have more than 2 decimal places.", result.Error.Message);
     }
+    
+    [Fact]
+    public async Task SellPolicy_ShouldReturnResultDomainError_IfPolicyHolderCreationCausesDomainError()
+    {
+        var invalidPolicyHolder = new WeInsureFixture()
+            .Build<PolicyHolderDto>()
+            .With(x => x.FirstName, string.Empty)
+            .Create();
+        var command = new WeInsureFixture()
+            .Build<SellPolicyCommand>()
+            .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
+            .With(x =>x.PolicyHolders, [invalidPolicyHolder])
+            .Create();
+        
+        var validator = Substitute.For<IValidator<SellPolicyCommand>>();
+        validator.ValidateAsync(command).Returns(new ValidationResult());
+        var useCase = new SellPolicyUseCase(validator);
+        
+        var result = await useCase.Execute(command);
+        
+        Assert.Null(result.Data);
+        Assert.NotNull(result.Error);
+        Assert.Equal(ErrorType.Domain, result.Error.Type);
+        Assert.Equal("Policy holder first name is required.", result.Error.Message);
+    }
 
 
     [Fact]
     public async Task SellPolicy_ShouldReturnResultDomainError_IfPolicyCreationCausesDomainError()
     {
-        var tooManyPolicyHolders = new WeInsureFixture().CreateMany<PolicyHolderDto>(4);
+        var tooManyPolicyHolders = new WeInsureFixture()
+            .Build<PolicyHolderDto>()
+            .With(x => x.DateOfBirth, new DateOnly(1990, 1, 1))
+            .CreateMany(4);
+        
         var command = new WeInsureFixture()
             .Build<SellPolicyCommand>()
             .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))

@@ -1,5 +1,3 @@
-using AutoFixture;
-using TestUtils.AutoFixture;
 using WeInsure.Domain.Entities;
 using WeInsure.Domain.Shared;
 using WeInsure.Domain.ValueObjects;
@@ -8,15 +6,8 @@ namespace WeInsure.Domain.Tests.Entities;
 
 public class PolicyTests
 {
-    // Reqs
-    // Policy can't be created more than 60 days in the future
-    // Policy must have at least 1 policy holder and no more than 3
-    // Policy holders must be at least 16 by start date
-    // Auto renewal policies can't use cheque
 
-    private readonly PolicyHolder _eligiblePolicyHolder =
-        PolicyHolder.Create("John", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 1))).Data!;
-
+    private readonly PolicyHolder _eligiblePolicyHolder = CreatePolicyHolder(new DateOnly(1984, 1, 1));
 
     [Fact]
     public void Policy_Create_ShouldReturnDomainError_WhenThereIsNoPolicyHolder()
@@ -38,7 +29,7 @@ public class PolicyTests
     public void Policy_Create_ShouldReturnDomainError_WhenThereIsMoreThan3PolicyHolders(int policyHolderCount)
     {
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
-        var policyHolders = new WeInsureFixture().CreateMany<PolicyHolder>(policyHolderCount).ToArray();
+        var policyHolders = new PolicyHolder[policyHolderCount].Select(_ => CreatePolicyHolder()).ToArray();
         var policy = Policy.Create("Ref", startDate, policyHolders, CreateMoney(20));
         
         Assert.False(policy.IsSuccess);
@@ -88,5 +79,10 @@ public class PolicyTests
     private static Money CreateMoney(decimal amount)
     {
         return Money.Create(amount).Data!;
+    }
+
+    private static PolicyHolder CreatePolicyHolder(DateOnly? dateOfBirth = null)
+    {
+       return  PolicyHolder.Create("John", "Doe", dateOfBirth ?? new DateOnly(1990,1,1)).Data!;
     }
 }

@@ -29,12 +29,22 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
         {
             return Result<SoldPolicy>.Failure(paidPrice.Error);
         }
-        
-        var policyHolders = command.PolicyHolders
-            .Select(ph => PolicyHolder.Create(ph.FirstName, ph.LastName, ph.DateOfBirth))
-            .ToArray();
 
-        var policy = Domain.Entities.Policy.Create("Ref", command.StartDate, policyHolders, policyPrice.Data);
+        var policyHolders = new List<PolicyHolder>();
+        foreach (var holderDto in command.PolicyHolders)
+        {
+           var holder = PolicyHolder.Create(holderDto.FirstName, holderDto.LastName, holderDto.DateOfBirth);
+
+           if (!holder.IsSuccess)
+           {
+               return Result<SoldPolicy>.Failure(holder.Error);
+           }
+           
+           policyHolders.Add(holder.Data);
+        }
+        
+
+        var policy = Domain.Entities.Policy.Create("Ref", command.StartDate, policyHolders.ToArray(), policyPrice.Data);
         if (!policy.IsSuccess)
         {
             return Result<SoldPolicy>.Failure(policy.Error);
