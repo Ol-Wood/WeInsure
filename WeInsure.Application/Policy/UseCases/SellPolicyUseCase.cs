@@ -15,7 +15,8 @@ namespace WeInsure.Application.Policy.UseCases;
 public class SellPolicyUseCase(
     IValidator<SellPolicyCommand> validator,
     IIdGenerator idGenerator,
-    IPolicyRepository policyRepository) : ISellPolicyUseCase
+    IPolicyRepository policyRepository,
+    IPolicyReferenceGenerator policyReferenceGenerator) : ISellPolicyUseCase
 {
     public async Task<Result<SoldPolicy>> Execute(SellPolicyCommand command)
     {
@@ -25,32 +26,17 @@ public class SellPolicyUseCase(
             return Result<SoldPolicy>.Failure(validationResult.ToValidationError());
         }
 
-        var policyPrice = Money.Create(command.Amount);
-        if (!policyPrice.IsSuccess)
-        {
-            return Result<SoldPolicy>.Failure(policyPrice.Error);
-        }
-
-        var paidPrice = Money.Create(command.Payment.Amount);
-        if (!paidPrice.IsSuccess)
-        {
-            return Result<SoldPolicy>.Failure(paidPrice.Error);
-        }
-
         var policyId = idGenerator.Generate();
+        var policyPrice = Money.Create(command.Amount).OrThrow();
+        var paidPrice = Money.Create(command.Payment.Amount).OrThrow();
 
-        var address = Address.Create(
-            command.PolicyAddress.AddressLine1,
-            command.PolicyAddress.AddressLine2,
-            command.PolicyAddress.AddressLine3,
-            command.PolicyAddress.PostCode);
-        if (!address.IsSuccess)
-        {
-            return Result<SoldPolicy>.Failure(address.Error);
-        }
+        var addressDto = command.PolicyAddress;
+        var address = Address
+            .Create(addressDto.AddressLine1, addressDto.AddressLine2, addressDto.AddressLine3, addressDto.PostCode)
+            .OrThrow();
 
-        var property = InsuredProperty.Create(idGenerator.Generate(), policyId, address.Data);
-
+        var property = InsuredProperty.Create(idGenerator.Generate(), policyId, address);
+        
         var policyHolders = CreatePolicyHolders(command, policyId);
         if (!policyHolders.IsSuccess)
         {
@@ -61,7 +47,7 @@ public class SellPolicyUseCase(
             idGenerator.Generate(),
             policyId,
             command.Payment.PaymentType,
-            paidPrice.Data,
+            paidPrice,
             command.Payment.PaymentReference);
         if (!payment.IsSuccess)
         {
@@ -74,7 +60,7 @@ public class SellPolicyUseCase(
             command.StartDate,
             command.PolicyType,
             policyHolders.Data,
-            policyPrice.Data,
+            policyPrice,
             property,
             payment.Data);
         if (!policy.IsSuccess)

@@ -8,6 +8,7 @@ using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases;
 using WeInsure.Application.Services;
 using WeInsure.Domain.Enums;
+using WeInsure.Domain.Exceptions;
 using WeInsure.Domain.Repositories;
 using WeInsure.Domain.Shared;
 using WeInsure.Domain.ValueObjects;
@@ -17,10 +18,11 @@ namespace WeInsure.Application.Tests.Policy.UseCases;
 public class SellPolicyUseCaseTests
 {
     private readonly Guid _policyId = Guid.CreateVersion7();
+    private readonly SellPolicyUseCase _useCase;
     private readonly IValidator<SellPolicyCommand> _validator = Substitute.For<IValidator<SellPolicyCommand>>();
     private readonly IIdGenerator _idGenerator = Substitute.For<IIdGenerator>();
-    private readonly SellPolicyUseCase _useCase;
     private readonly IPolicyRepository _policyRepository = Substitute.For<IPolicyRepository>();
+    private readonly IPolicyReferenceGenerator _policyReferenceGenerator = Substitute.For<IPolicyReferenceGenerator>();
 
     private readonly AddressDto _validAddressDto = new()
     {
@@ -41,7 +43,7 @@ public class SellPolicyUseCaseTests
     {
         _validator.ValidateAsync(Arg.Any<SellPolicyCommand>()).Returns(new ValidationResult());
         _idGenerator.Generate().Returns(_policyId);
-        _useCase = new SellPolicyUseCase(_validator, _idGenerator, _policyRepository);
+        _useCase = new SellPolicyUseCase(_validator, _idGenerator, _policyRepository, _policyReferenceGenerator);
     }
 
     [Fact]
@@ -58,7 +60,7 @@ public class SellPolicyUseCaseTests
     }
 
     [Fact]
-    public async Task SellPolicy_ShouldReturnDomainError_IfPolicyPriceAmountIsNotValid()
+    public async Task SellPolicy_ShouldThrowDomainError_IfPolicyPriceAmountIsNotValid()
     {
         var command = new WeInsureFixture()
             .Build<SellPolicyCommand>()
@@ -68,16 +70,15 @@ public class SellPolicyUseCaseTests
             .With(x => x.Amount, 2.789m)
             .Create();
 
-        var result = await _useCase.Execute(command);
+        var act = () => _useCase.Execute(command);
 
-        Assert.Null(result.Data);
-        Assert.NotNull(result.Error);
-        Assert.Equal(ErrorType.Domain, result.Error.Type);
-        Assert.Equal("Amount cannot have more than 2 decimal places.", result.Error.Message);
+        var exception = await Assert.ThrowsAsync<DomainException>(act);
+        Assert.NotNull(exception);
+        Assert.Equal("Amount cannot have more than 2 decimal places.", exception.Message);
     }
 
     [Fact]
-    public async Task SellPolicy_ShouldReturnDomainError_IfPolicyAddressIsInvalid()
+    public async Task SellPolicy_ShouldThrowDomainError_IfPolicyAddressIsInvalid()
     {
         var invalidAddress = new AddressDto
         {
@@ -94,12 +95,11 @@ public class SellPolicyUseCaseTests
             .With(x => x.PolicyAddress, invalidAddress)
             .Create();
 
-        var result = await _useCase.Execute(command);
+        var act = () => _useCase.Execute(command);
 
-        Assert.Null(result.Data);
-        Assert.NotNull(result.Error);
-        Assert.Equal(ErrorType.Domain, result.Error.Type);
-        Assert.Equal("AddressLine1 is required", result.Error.Message);
+        var exception = await Assert.ThrowsAsync<DomainException>(act);
+        Assert.NotNull(exception);
+        Assert.Equal("AddressLine1 is required", exception.Message);
     }
 
     [Fact]
