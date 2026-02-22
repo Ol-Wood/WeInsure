@@ -8,6 +8,7 @@ public class Policy
 {
     private const int PolicyMaxDaysInAdvance = 60;
     
+    public Guid Id { get; private set; }
     public DateOnly StartDate { get; private set; }
     public DateOnly EndDate { get; private set; }
     public PolicyType PolicyType { get; private set; }
@@ -16,6 +17,7 @@ public class Policy
     public IReadOnlyCollection<PolicyHolder> PolicyHolders { get; private set; }
     
     public static Result<Policy> Create(
+        Guid id,
         string reference, 
         DateOnly startDate, 
         PolicyHolder[] policyHolders, 

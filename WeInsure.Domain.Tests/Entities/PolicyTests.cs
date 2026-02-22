@@ -16,6 +16,7 @@ public class PolicyTests
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
         var policyHolders = Array.Empty<PolicyHolder>();
         var policy = Policy.Create(
+            Guid.CreateVersion7(),
             "Ref",
             startDate, policyHolders, 
             CreateMoney(20), 
@@ -37,6 +38,7 @@ public class PolicyTests
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
         var policyHolders = new PolicyHolder[policyHolderCount].Select(_ => CreatePolicyHolder()).ToArray();
         var policy = Policy.Create(
+            Guid.CreateVersion7(),
             "Ref",
             startDate,
             policyHolders, 
@@ -63,6 +65,7 @@ public class PolicyTests
         };
           
         var policy = Policy.Create(
+            Guid.CreateVersion7(),
             "Ref", 
             startDate, 
             policyHolders, 
@@ -86,6 +89,7 @@ public class PolicyTests
         };
           
         var policy = Policy.Create(
+            Guid.CreateVersion7(),
             "Ref", 
             startDate, 
             policyHolders, 

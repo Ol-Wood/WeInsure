@@ -60,6 +60,7 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
         }
         
         var policy = PolicyEntity.Create(
+            idGenerator.Generate(),
             "Ref", 
             command.StartDate, 
             policyHolders.Data, 
