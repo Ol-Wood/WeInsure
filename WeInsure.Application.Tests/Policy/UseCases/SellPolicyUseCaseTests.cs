@@ -6,6 +6,8 @@ using TestUtils.AutoFixture;
 using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases;
+using WeInsure.Application.Services;
+using WeInsure.Domain.Enums;
 using WeInsure.Domain.Shared;
 
 namespace WeInsure.Application.Tests.Policy.UseCases;
@@ -14,6 +16,7 @@ public class SellPolicyUseCaseTests
 {
 
     private readonly IValidator<SellPolicyCommand> _validator = Substitute.For<IValidator<SellPolicyCommand>>();
+    private readonly IIdGenerator _idGenerator = Substitute.For<IIdGenerator>();
     private readonly SellPolicyUseCase _useCase;
 
     private readonly AddressDto _validAddressDto = new()
@@ -34,7 +37,8 @@ public class SellPolicyUseCaseTests
     public SellPolicyUseCaseTests()
     {
         _validator.ValidateAsync(Arg.Any<SellPolicyCommand>()).Returns(new ValidationResult());
-        _useCase = new SellPolicyUseCase(_validator);
+        _idGenerator.Generate().Returns(Guid.CreateVersion7());
+        _useCase = new SellPolicyUseCase(_validator, _idGenerator);
     }
 
     [Fact]
@@ -94,6 +98,33 @@ public class SellPolicyUseCaseTests
         Assert.Equal(ErrorType.Domain, result.Error.Type);
         Assert.Equal("AddressLine1 is required", result.Error.Message);
     }
+    
+    [Fact]
+    public async Task SellPolicy_ShouldReturnDomainError_IfPaymentIsInvalid()
+    {
+        var invalidPayment = new PaymentDto
+        {
+            Amount = 2.78m,
+            PaymentReference = "",
+            PaymentType = PaymentType.Card
+        };
+        var command = new WeInsureFixture()
+            .Build<SellPolicyCommand>()
+            .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
+            .With(x =>x.PolicyHolders, [_validPolicyHolder])
+            .With(x => x.Amount, 2.78m)
+            .With(x => x.Payment, invalidPayment)
+            .With(x => x.PolicyAddress, _validAddressDto)
+            .Create();
+        
+        var result = await _useCase.Execute(command);
+
+        Assert.Null(result.Data);
+        Assert.NotNull(result.Error);
+        Assert.Equal(ErrorType.Domain, result.Error.Type);
+        Assert.Equal("Payment reference is required", result.Error.Message);
+    }
+
     
     [Fact]
     public async Task SellPolicy_ShouldReturnResultDomainError_IfPolicyHolderCreationCausesDomainError()

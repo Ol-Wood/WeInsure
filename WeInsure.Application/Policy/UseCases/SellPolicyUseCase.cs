@@ -2,6 +2,7 @@ using FluentValidation;
 using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases.Interfaces;
+using WeInsure.Application.Services;
 using WeInsure.Domain.Entities;
 using WeInsure.Domain.Shared;
 using WeInsure.Domain.ValueObjects;
@@ -9,7 +10,7 @@ using PolicyEntity = WeInsure.Domain.Entities.Policy;
 
 namespace WeInsure.Application.Policy.UseCases;
 
-public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellPolicyUseCase
+public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGenerator idGenerator) : ISellPolicyUseCase
 {
     public async Task<Result<SoldPolicy>> Execute(SellPolicyCommand command)
     {
@@ -47,12 +48,24 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
             return Result<SoldPolicy>.Failure(policyHolders.Error);
         }
         
+        
+        var payment = Payment.Create(
+            idGenerator.Generate(), 
+            command.Payment.PaymentType, 
+            paidPrice.Data, 
+            command.Payment.PaymentReference);
+        if (!payment.IsSuccess)
+        {
+            return Result<SoldPolicy>.Failure(payment.Error);
+        }
+        
         var policy = PolicyEntity.Create(
             "Ref", 
             command.StartDate, 
             policyHolders.Data, 
             policyPrice.Data,
-            address.Data);
+            address.Data,
+            payment.Data);
         if (!policy.IsSuccess)
         {
             return Result<SoldPolicy>.Failure(policy.Error);

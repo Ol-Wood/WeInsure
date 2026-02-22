@@ -15,7 +15,13 @@ public class Policy
     public string Reference { get; private set; }
     public IReadOnlyCollection<PolicyHolder> PolicyHolders { get; private set; }
     
-    public static Result<Policy> Create(string reference, DateOnly startDate, PolicyHolder[] policyHolders, Money price, Address address)
+    public static Result<Policy> Create(
+        string reference, 
+        DateOnly startDate, 
+        PolicyHolder[] policyHolders, 
+        Money price, 
+        Address address,
+        Payment payment)
     {
         if (policyHolders.Length is 0 or > 3)
         {
