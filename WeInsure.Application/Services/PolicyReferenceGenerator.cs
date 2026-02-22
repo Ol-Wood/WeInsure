@@ -23,7 +23,7 @@ public class PolicyReferenceGenerator(IPolicyRepository policyRepository) : IPol
                 break;
             }
             
-            var policyReference = new PolicyReference();
+            var policyReference = PolicyReference.Create();
             if (await policyRepository.Exists(policyReference))
             {
                 retryCount = --retryCount;
