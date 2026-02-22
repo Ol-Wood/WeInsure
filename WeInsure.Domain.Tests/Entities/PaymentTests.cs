@@ -7,18 +7,20 @@ namespace WeInsure.Domain.Tests.Entities;
 
 public class PaymentTests
 {
-
+    
+    private readonly Guid _paymentId = Guid.NewGuid();
+    private readonly Guid _policyId = Guid.NewGuid();
+    
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
     public void Payment_Create_ShouldReturnDomainError_WhenReferenceIsNullOrWhitespace(string reference)
     {
-        var id = Guid.NewGuid();
         const PaymentType paymentType = PaymentType.Card;
         var amount = CreateMoney(100);
 
-        var result = Payment.Create(id, paymentType, amount, reference);
+        var result = Payment.Create(_paymentId, _policyId, paymentType, amount, reference);
 
         Assert.False(result.IsSuccess);
         Assert.Null(result.Data);
@@ -29,12 +31,11 @@ public class PaymentTests
     [Fact]
     public void Payment_Create_ShouldReturnDomainError_WhenPaymentTypeIsInvalid()
     {
-        var id = Guid.NewGuid();
         const PaymentType invalidPaymentType = (PaymentType)999;
         var amount = CreateMoney(100);
         const string reference = "REF123";
 
-        var result = Payment.Create(id, invalidPaymentType, amount, reference);
+        var result = Payment.Create(_paymentId, _policyId, invalidPaymentType, amount, reference);
 
         Assert.False(result.IsSuccess);
         Assert.Null(result.Data);
@@ -45,16 +46,16 @@ public class PaymentTests
     [Fact]
     public void Payment_Create_ShouldReturnSuccess_WhenAllFieldsAreValid()
     {
-        var id = Guid.NewGuid();
         const PaymentType paymentType = PaymentType.Card;
         var amount = CreateMoney(100);
         const string reference = "CARD-REF-123";
 
-        var result = Payment.Create(id, paymentType, amount, reference);
+        var result = Payment.Create(_paymentId, _policyId, paymentType, amount, reference);
 
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Data);
-        Assert.Equal(id, result.Data.Id);
+        Assert.Equal(_paymentId, result.Data.Id);
+        Assert.Equal(_policyId, result.Data.PolicyId);
         Assert.Equal(paymentType, result.Data.PaymentType);
         Assert.Equal(amount, result.Data.Amount);
         Assert.Equal(reference, result.Data.Reference);

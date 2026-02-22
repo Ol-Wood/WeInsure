@@ -32,6 +32,8 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
             return Result<SoldPolicy>.Failure(paidPrice.Error);
         }
         
+        var policyId = idGenerator.Generate();
+        
         var address = Address.Create(
             command.PolicyAddress.AddressLine1, 
             command.PolicyAddress.AddressLine2, 
@@ -48,9 +50,9 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
             return Result<SoldPolicy>.Failure(policyHolders.Error);
         }
         
-        
         var payment = Payment.Create(
             idGenerator.Generate(), 
+            policyId,
             command.Payment.PaymentType, 
             paidPrice.Data, 
             command.Payment.PaymentReference);
@@ -60,7 +62,7 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
         }
         
         var policy = PolicyEntity.Create(
-            idGenerator.Generate(),
+            policyId,
             "Ref", 
             command.StartDate, 
             policyHolders.Data, 

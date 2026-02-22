@@ -7,8 +7,8 @@ namespace WeInsure.Domain.Tests.Entities;
 
 public class PolicyTests
 {
-
     private readonly PolicyHolder _eligiblePolicyHolder = CreatePolicyHolder(new DateOnly(1984, 1, 1));
+    private readonly Guid _policyId = Guid.CreateVersion7();
 
     [Fact]
     public void Policy_Create_ShouldReturnDomainError_WhenThereIsNoPolicyHolder()
@@ -16,12 +16,12 @@ public class PolicyTests
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
         var policyHolders = Array.Empty<PolicyHolder>();
         var policy = Policy.Create(
-            Guid.CreateVersion7(),
+            _policyId,
             "Ref",
             startDate, policyHolders, 
             CreateMoney(20), 
             CreateAddress(), 
-            CreatePayment());
+            CreatePayment(_policyId));
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -38,13 +38,13 @@ public class PolicyTests
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow);
         var policyHolders = new PolicyHolder[policyHolderCount].Select(_ => CreatePolicyHolder()).ToArray();
         var policy = Policy.Create(
-            Guid.CreateVersion7(),
+            _policyId,
             "Ref",
             startDate,
             policyHolders, 
             CreateMoney(20),
             CreateAddress(),
-            CreatePayment());
+            CreatePayment(_policyId));
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -65,13 +65,13 @@ public class PolicyTests
         };
           
         var policy = Policy.Create(
-            Guid.CreateVersion7(),
+            _policyId,
             "Ref", 
             startDate, 
             policyHolders, 
             CreateMoney(20),
             CreateAddress(),
-            CreatePayment());
+            CreatePayment(_policyId));
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -89,13 +89,13 @@ public class PolicyTests
         };
           
         var policy = Policy.Create(
-            Guid.CreateVersion7(),
+            _policyId,
             "Ref", 
             startDate, 
             policyHolders, 
             CreateMoney(20),
             CreateAddress(),
-            CreatePayment());
+            CreatePayment(_policyId));
         
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -119,8 +119,8 @@ public class PolicyTests
         return Address.Create("123 Main Street", "New York", "USA", "12345").Data!;
     }
 
-    private static Payment CreatePayment()
+    private static Payment CreatePayment(Guid policyId)
     {
-        return Payment.Create(Guid.CreateVersion7(), PaymentType.Card, CreateMoney(20), "REF").Data!;
+        return Payment.Create(Guid.CreateVersion7(), policyId, PaymentType.Card, CreateMoney(20), "REF").Data!;
     }
 }
