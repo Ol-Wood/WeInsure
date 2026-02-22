@@ -2,9 +2,9 @@ using WeInsure.Domain.Enums;
 
 namespace WeInsure.Application.Policy.Dtos;
 
-public class PaymentDto
+public record PaymentDto
 {
-    public required string PaymentReference { get; set; }
-    public decimal Amount { get; set; }
-    public PaymentType PaymentType { get; set; }
+    public required string PaymentReference { get; init; }
+    public decimal Amount { get; init; }
+    public PaymentType PaymentType { get; init; }
 }
