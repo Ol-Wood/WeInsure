@@ -10,7 +10,6 @@ public class Error
     public string Message { get;  }
     public ErrorType Type { get; }
     
-    
-    public static Error Validation(string message) => new(message, ErrorType.Validation);
+    public static Error Validation(params string[]? message) => new(string.Join(", ", message), ErrorType.Validation);
     public static Error Domain(string message) => new(message, ErrorType.Domain);
 }

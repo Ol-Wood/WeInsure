@@ -3,6 +3,7 @@ using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases.Interfaces;
 using WeInsure.Application.Services;
+using WeInsure.Application.Utils;
 using WeInsure.Domain.Entities;
 using WeInsure.Domain.Repositories;
 using WeInsure.Domain.Shared;
@@ -21,7 +22,7 @@ public class SellPolicyUseCase(
         var validationResult = await validator.ValidateAsync(command);
         if (!validationResult.IsValid)
         {
-            return Result<SoldPolicy>.Failure(Error.Validation("error"));
+            return Result<SoldPolicy>.Failure(validationResult.ToValidationError());
         }
 
         var policyPrice = Money.Create(command.Amount);

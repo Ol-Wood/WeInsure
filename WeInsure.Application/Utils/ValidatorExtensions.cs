@@ -1,4 +1,5 @@
 using FluentValidation;
+using FluentValidation.Results;
 using WeInsure.Domain.Shared;
 
 namespace WeInsure.Application.Utils;
@@ -15,5 +16,11 @@ public static class ValidatorExtensions
             if (!result.IsSuccess)
                 context.AddFailure(result.Error.Message);
         });
+    }
+
+
+    public static Error ToValidationError(this ValidationResult validationResult)
+    {
+        return Error.Validation(validationResult.Errors.Select(x => x.ErrorMessage).ToArray());
     }
 }
