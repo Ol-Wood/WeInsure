@@ -15,7 +15,7 @@ public class PolicyHolderTests
         var lastName = "Doe";
         var dateOfBirth = DateOnly.FromDateTime(new DateTime(1984, 1, 1));
 
-        var result = PolicyHolder.Create(firstName, lastName, dateOfBirth);
+        var result = PolicyHolder.Create(Guid.CreateVersion7(), firstName, lastName, dateOfBirth);
 
         Assert.False(result.IsSuccess);
         Assert.Null(result.Data);
@@ -32,7 +32,7 @@ public class PolicyHolderTests
         var firstName = "John";
         var dateOfBirth = DateOnly.FromDateTime(new DateTime(1984, 1, 1));
 
-        var result = PolicyHolder.Create(firstName, lastName, dateOfBirth);
+        var result = PolicyHolder.Create(Guid.CreateVersion7(), firstName, lastName, dateOfBirth);
 
         Assert.False(result.IsSuccess);
         Assert.Null(result.Data);
@@ -47,7 +47,7 @@ public class PolicyHolderTests
         var lastName = "Doe";
         var dateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
 
-        var result = PolicyHolder.Create(firstName, lastName, dateOfBirth);
+        var result = PolicyHolder.Create(Guid.CreateVersion7(), firstName, lastName, dateOfBirth);
 
         Assert.False(result.IsSuccess);
         Assert.Null(result.Data);
@@ -62,7 +62,7 @@ public class PolicyHolderTests
         var lastName = "Doe";
         var dateOfBirth = DateOnly.FromDateTime(new DateTime(1984, 1, 1));
 
-        var result = PolicyHolder.Create(firstName, lastName, dateOfBirth);
+        var result = PolicyHolder.Create(Guid.CreateVersion7(), firstName, lastName, dateOfBirth);
 
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Data);

@@ -80,7 +80,11 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
         var policyHolders = new List<PolicyHolder>();
         foreach (var holderDto in command.PolicyHolders)
         {
-            var holder = PolicyHolder.Create(holderDto.FirstName, holderDto.LastName, holderDto.DateOfBirth);
+            var holder = PolicyHolder.Create(
+                idGenerator.Generate(),
+                holderDto.FirstName, 
+                holderDto.LastName, 
+                holderDto.DateOfBirth);
 
             if (!holder.IsSuccess)
             {

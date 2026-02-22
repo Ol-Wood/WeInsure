@@ -5,19 +5,21 @@ namespace WeInsure.Domain.Entities;
 public record PolicyHolder
 {
 
-    private PolicyHolder(string firstName, string lastName, DateOnly dateOfBirth)
+    private PolicyHolder(Guid id, string firstName, string lastName, DateOnly dateOfBirth)
     {
+        Id = id;
         FirstName = firstName;
         LastName = lastName;
         DateOfBirth = dateOfBirth;
     }
 
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public DateOnly DateOfBirth { get; set; }
+    public Guid Id { get; private set; }
+    public string FirstName { get; private set; }
+    public string LastName { get; private set; }
+    public DateOnly DateOfBirth { get; private set; }
 
 
-    public static Result<PolicyHolder> Create(string firstName, string lastName, DateOnly dateOfBirth)
+    public static Result<PolicyHolder> Create(Guid id, string firstName, string lastName, DateOnly dateOfBirth)
     {
         if (string.IsNullOrWhiteSpace(firstName))
         {
@@ -34,6 +36,6 @@ public record PolicyHolder
             return Result.Failure<PolicyHolder>(Error.Domain("Policy holder date of birth cannot be in the future."));
         }
 
-        return Result.Success(new PolicyHolder(firstName, lastName, dateOfBirth));
+        return Result.Success(new PolicyHolder(id, firstName, lastName, dateOfBirth));
     }
 }

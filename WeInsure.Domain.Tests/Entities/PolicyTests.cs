@@ -55,7 +55,7 @@ public class PolicyTests
     public void Policy_Create_ShouldReturnDomainError_WhenAnyPolicyHolderIsNotEligibleAge()
     {
         var startDate = DateOnly.FromDateTime(new DateTime(2000, 1, 1));
-        var unEligiblePolicyHolder = PolicyHolder.Create("Jane", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 2))).Data!;
+        var unEligiblePolicyHolder = PolicyHolder.Create(Guid.CreateVersion7(),"Jane", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 2))).Data!;
         var policyHolders = new[]
         {
             _eligiblePolicyHolder,
@@ -107,7 +107,7 @@ public class PolicyTests
 
     private static PolicyHolder CreatePolicyHolder(DateOnly? dateOfBirth = null)
     {
-       return  PolicyHolder.Create("John", "Doe", dateOfBirth ?? new DateOnly(1990,1,1)).Data!;
+       return  PolicyHolder.Create(Guid.CreateVersion7(), "John", "Doe", dateOfBirth ?? new DateOnly(1990,1,1)).Data!;
     }
 
     private static Address CreateAddress()
