@@ -13,7 +13,7 @@ public class PolicyTests
 
     public PolicyTests()
     {
-        _eligiblePolicyHolder =  CreatePolicyHolder(new DateOnly(1984, 1, 1));
+        _eligiblePolicyHolder = CreatePolicyHolder(new DateOnly(1984, 1, 1));
     }
 
     [Fact]
@@ -24,17 +24,19 @@ public class PolicyTests
         var policy = Policy.Create(
             _policyId,
             "Ref",
-            startDate, policyHolders, 
-            CreateMoney(20), 
-            CreateInsuredProperty(), 
+            startDate, 
+            PolicyType.Household,
+            policyHolders,
+            CreateMoney(20),
+            CreateInsuredProperty(),
             CreatePayment());
-        
+
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
         Assert.Equal(ErrorType.Domain, policy.Error.Type);
         Assert.Equal("Policy must have at least 1 policy holder and no more than 3.", policy.Error.Message);
     }
-    
+
     [Theory]
     [InlineData(4)]
     [InlineData(5)]
@@ -47,11 +49,12 @@ public class PolicyTests
             _policyId,
             "Ref",
             startDate,
-            policyHolders, 
+            PolicyType.Household,
+            policyHolders,
             CreateMoney(20),
             CreateInsuredProperty(),
             CreatePayment());
-        
+
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
         Assert.Equal(ErrorType.Domain, policy.Error.Type);
@@ -63,26 +66,29 @@ public class PolicyTests
     public void Policy_Create_ShouldReturnDomainError_WhenAnyPolicyHolderIsNotEligibleAge()
     {
         var startDate = DateOnly.FromDateTime(new DateTime(2000, 1, 1));
-        var unEligiblePolicyHolder = PolicyHolder.Create(Guid.CreateVersion7(), _policyId,"Jane", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 2))).Data!;
+        var unEligiblePolicyHolder = PolicyHolder.Create(Guid.CreateVersion7(), _policyId, "Jane", "Doe",
+            DateOnly.FromDateTime(new DateTime(1984, 1, 2))).Data!;
         var policyHolders = new[]
         {
             _eligiblePolicyHolder,
-           unEligiblePolicyHolder
+            unEligiblePolicyHolder
         };
-          
+
         var policy = Policy.Create(
             _policyId,
-            "Ref", 
-            startDate, 
-            policyHolders, 
+            "Ref",
+            startDate,
+            PolicyType.Household,
+            policyHolders,
             CreateMoney(20),
             CreateInsuredProperty(),
             CreatePayment());
-        
+
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
         Assert.Equal(ErrorType.Domain, policy.Error.Type);
-        Assert.Equal("All policy holders must be at least 16 years of age by the policy start date.", policy.Error.Message);
+        Assert.Equal("All policy holders must be at least 16 years of age by the policy start date.",
+            policy.Error.Message);
     }
 
     [Theory]
@@ -93,21 +99,81 @@ public class PolicyTests
         {
             _eligiblePolicyHolder,
         };
-          
+
         var policy = Policy.Create(
             _policyId,
-            "Ref", 
-            startDate, 
-            policyHolders, 
+            "Ref",
+            startDate,
+            PolicyType.Household,
+            policyHolders,
             CreateMoney(20),
             CreateInsuredProperty(),
             CreatePayment());
-        
+
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
         Assert.Equal(ErrorType.Domain, policy.Error.Type);
         Assert.Equal("Policy start date can't be more than 60 days in the future", policy.Error.Message);
+    }
+    
+    [Fact]
+    public void Policy_Create_ShouldReturnDomainError_WhenPolicyTypeIsInvalid()
+    {
+        var policyHolders = new[]
+        {
+            _eligiblePolicyHolder,
+        };
 
+        var policy = Policy.Create(
+            _policyId,
+            "Ref",
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
+            (PolicyType)99,
+            policyHolders,
+            CreateMoney(20),
+            CreateInsuredProperty(),
+            CreatePayment());
+
+        Assert.False(policy.IsSuccess);
+        Assert.Null(policy.Data);
+        Assert.Equal(ErrorType.Domain, policy.Error.Type);
+        Assert.Equal("Policy type is not defined.", policy.Error.Message);
+    }
+
+
+
+    [Theory]
+    [InlineData(PolicyType.Household)]
+    [InlineData(PolicyType.BuyToLet)]
+    public void Policy_Create_ShouldReturnPolicy_WhenPolicyIsValid(PolicyType policyType)
+    {
+        const string reference = "Ref";
+        var price = CreateMoney(20);
+        var insuredProperty = CreateInsuredProperty();
+        var payment = CreatePayment();
+        PolicyHolder[] policyHolders = [_eligiblePolicyHolder];
+        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
+        
+        var policy = Policy.Create(
+            _policyId,
+            reference,
+            startDate,
+            policyType,
+            policyHolders,
+            price,
+            insuredProperty,
+            payment);
+
+        Assert.True(policy.IsSuccess);
+        Assert.Null(policy.Error);
+        
+        var data = policy.Data;
+        Assert.Equal(reference, data.Reference);
+        Assert.Equal(policyHolders, data.PolicyHolders);
+        Assert.Equal(insuredProperty, data.InsuredProperty);
+        Assert.Equal(policyType, data.PolicyType);
+        Assert.Equal(payment, data.Payment);
+        Assert.Equal(price, data.Price);
     }
 
     private static Money CreateMoney(decimal amount)
@@ -117,7 +183,8 @@ public class PolicyTests
 
     private PolicyHolder CreatePolicyHolder(DateOnly? dateOfBirth = null)
     {
-       return  PolicyHolder.Create(Guid.CreateVersion7(), _policyId,"John", "Doe", dateOfBirth ?? new DateOnly(1990,1,1)).Data!;
+        return PolicyHolder.Create(Guid.CreateVersion7(), _policyId, "John", "Doe",
+            dateOfBirth ?? new DateOnly(1990, 1, 1)).Data!;
     }
 
     private InsuredProperty CreateInsuredProperty()

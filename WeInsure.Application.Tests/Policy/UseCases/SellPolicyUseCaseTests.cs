@@ -8,16 +8,19 @@ using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases;
 using WeInsure.Application.Services;
 using WeInsure.Domain.Enums;
+using WeInsure.Domain.Repositories;
 using WeInsure.Domain.Shared;
+using WeInsure.Domain.ValueObjects;
 
 namespace WeInsure.Application.Tests.Policy.UseCases;
 
 public class SellPolicyUseCaseTests
 {
-
+    private readonly Guid _policyId = Guid.CreateVersion7();
     private readonly IValidator<SellPolicyCommand> _validator = Substitute.For<IValidator<SellPolicyCommand>>();
     private readonly IIdGenerator _idGenerator = Substitute.For<IIdGenerator>();
     private readonly SellPolicyUseCase _useCase;
+    private readonly IPolicyRepository _policyRepository = Substitute.For<IPolicyRepository>();
 
     private readonly AddressDto _validAddressDto = new()
     {
@@ -33,11 +36,11 @@ public class SellPolicyUseCaseTests
         LastName = "Doe",
         DateOfBirth = new DateOnly(1990, 1, 1),
     };
-    
+
     public SellPolicyUseCaseTests()
     {
         _validator.ValidateAsync(Arg.Any<SellPolicyCommand>()).Returns(new ValidationResult());
-        _idGenerator.Generate().Returns(Guid.CreateVersion7());
+        _idGenerator.Generate().Returns(_policyId);
         _useCase = new SellPolicyUseCase(_validator, _idGenerator);
     }
 
@@ -46,27 +49,27 @@ public class SellPolicyUseCaseTests
     {
         var command = new WeInsureFixture().Create<SellPolicyCommand>();
         _validator.ValidateAsync(command).Returns(new ValidationResult([new ValidationFailure("", "")]));
-        
+
         var result = await _useCase.Execute(command);
-        
+
         Assert.Null(result.Data);
         Assert.NotNull(result.Error);
         Assert.Equal(ErrorType.Validation, result.Error.Type);
     }
-    
+
     [Fact]
     public async Task SellPolicy_ShouldReturnDomainError_IfPolicyPriceAmountIsNotValid()
     {
         var command = new WeInsureFixture()
             .Build<SellPolicyCommand>()
             .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
-            .With(x =>x.PolicyHolders, [_validPolicyHolder])
+            .With(x => x.PolicyHolders, [_validPolicyHolder])
             .With(x => x.PolicyAddress, _validAddressDto)
             .With(x => x.Amount, 2.789m)
             .Create();
-        
+
         var result = await _useCase.Execute(command);
-        
+
         Assert.Null(result.Data);
         Assert.NotNull(result.Error);
         Assert.Equal(ErrorType.Domain, result.Error.Type);
@@ -86,11 +89,11 @@ public class SellPolicyUseCaseTests
         var command = new WeInsureFixture()
             .Build<SellPolicyCommand>()
             .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
-            .With(x =>x.PolicyHolders, [_validPolicyHolder])
+            .With(x => x.PolicyHolders, [_validPolicyHolder])
             .With(x => x.Amount, 2.78m)
             .With(x => x.PolicyAddress, invalidAddress)
             .Create();
-        
+
         var result = await _useCase.Execute(command);
 
         Assert.Null(result.Data);
@@ -98,7 +101,7 @@ public class SellPolicyUseCaseTests
         Assert.Equal(ErrorType.Domain, result.Error.Type);
         Assert.Equal("AddressLine1 is required", result.Error.Message);
     }
-    
+
     [Fact]
     public async Task SellPolicy_ShouldReturnDomainError_IfPaymentIsInvalid()
     {
@@ -111,12 +114,12 @@ public class SellPolicyUseCaseTests
         var command = new WeInsureFixture()
             .Build<SellPolicyCommand>()
             .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
-            .With(x =>x.PolicyHolders, [_validPolicyHolder])
+            .With(x => x.PolicyHolders, [_validPolicyHolder])
             .With(x => x.Amount, 2.78m)
             .With(x => x.Payment, invalidPayment)
             .With(x => x.PolicyAddress, _validAddressDto)
             .Create();
-        
+
         var result = await _useCase.Execute(command);
 
         Assert.Null(result.Data);
@@ -125,7 +128,7 @@ public class SellPolicyUseCaseTests
         Assert.Equal("Payment reference is required", result.Error.Message);
     }
 
-    
+
     [Fact]
     public async Task SellPolicy_ShouldReturnResultDomainError_IfPolicyHolderCreationCausesDomainError()
     {
@@ -136,12 +139,12 @@ public class SellPolicyUseCaseTests
         var command = new WeInsureFixture()
             .Build<SellPolicyCommand>()
             .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
-            .With(x =>x.PolicyHolders, [invalidPolicyHolder])
+            .With(x => x.PolicyHolders, [invalidPolicyHolder])
             .With(x => x.PolicyAddress, _validAddressDto)
             .Create();
-        
+
         var result = await _useCase.Execute(command);
-        
+
         Assert.Null(result.Data);
         Assert.NotNull(result.Error);
         Assert.Equal(ErrorType.Domain, result.Error.Type);
@@ -156,19 +159,41 @@ public class SellPolicyUseCaseTests
             .Build<PolicyHolderDto>()
             .With(x => x.DateOfBirth, new DateOnly(1990, 1, 1))
             .CreateMany(4);
-        
+
         var command = new WeInsureFixture()
             .Build<SellPolicyCommand>()
             .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
-            .With(x =>x.PolicyHolders, tooManyPolicyHolders.ToList())
+            .With(x => x.PolicyHolders, tooManyPolicyHolders.ToList())
             .With(x => x.PolicyAddress, _validAddressDto)
             .Create();
-        
+
         var result = await _useCase.Execute(command);
-        
+
         Assert.Null(result.Data);
         Assert.NotNull(result.Error);
         Assert.Equal(ErrorType.Domain, result.Error.Type);
         Assert.Equal("Policy must have at least 1 policy holder and no more than 3.", result.Error.Message);
+    }
+
+    [Fact]
+    public async Task SellPolicy_ShouldCreateAndSavePolicy_IfPolicyCreationIsValid()
+    {
+        var command = new WeInsureFixture()
+            .Build<SellPolicyCommand>()
+            .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
+            .With(x => x.PolicyHolders, [_validPolicyHolder])
+            .With(x => x.PolicyAddress, _validAddressDto)
+            .With(x => x.PolicyType, PolicyType.Household)
+            .Create();
+
+        await _useCase.Execute(command);
+
+        await _policyRepository.Add(Arg.Is<Domain.Entities.Policy>(x =>
+            x.Id == _policyId &&
+            x.StartDate == command.StartDate &&
+            x.Price == Money.Create(command.Amount).Data &&
+            x.PolicyHolders.Count == command.PolicyHolders.Count &&
+            x.InsuredProperty.Address.AddressLine1 == command.PolicyAddress.AddressLine1
+        ));
     }
 }

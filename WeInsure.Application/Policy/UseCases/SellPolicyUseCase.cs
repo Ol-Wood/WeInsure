@@ -66,6 +66,7 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator, IIdGener
             policyId,
             "Ref", 
             command.StartDate, 
+            command.PolicyType,
             policyHolders.Data, 
             policyPrice.Data,
             property,
