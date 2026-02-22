@@ -13,15 +13,37 @@ namespace WeInsure.Application.Tests.Policy.UseCases;
 public class SellPolicyUseCaseTests
 {
 
+    private readonly IValidator<SellPolicyCommand> _validator = Substitute.For<IValidator<SellPolicyCommand>>();
+    private readonly SellPolicyUseCase _useCase;
+
+    private readonly AddressDto _validAddressDto = new()
+    {
+        AddressLine1 = "123 Main Street",
+        AddressLine2 = "Some other street",
+        AddressLine3 = "Some other street",
+        PostCode = "M21 8HG"
+    };
+
+    private readonly PolicyHolderDto _validPolicyHolder = new()
+    {
+        FirstName = "John",
+        LastName = "Doe",
+        DateOfBirth = new DateOnly(1990, 1, 1),
+    };
+    
+    public SellPolicyUseCaseTests()
+    {
+        _validator.ValidateAsync(Arg.Any<SellPolicyCommand>()).Returns(new ValidationResult());
+        _useCase = new SellPolicyUseCase(_validator);
+    }
+
     [Fact]
     public async Task SellPolicy_ShouldReturnResultValidationError_IfCommandValidationFails()
     {
         var command = new WeInsureFixture().Create<SellPolicyCommand>();
-        var validator = Substitute.For<IValidator<SellPolicyCommand>>();
-        validator.ValidateAsync(command).Returns(new ValidationResult([new ValidationFailure("", "")]));
-        var useCase = new SellPolicyUseCase(validator);
+        _validator.ValidateAsync(command).Returns(new ValidationResult([new ValidationFailure("", "")]));
         
-        var result = await useCase.Execute(command);
+        var result = await _useCase.Execute(command);
         
         Assert.Null(result.Data);
         Assert.NotNull(result.Error);
@@ -34,20 +56,43 @@ public class SellPolicyUseCaseTests
         var command = new WeInsureFixture()
             .Build<SellPolicyCommand>()
             .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
-            .With(x =>x.PolicyHolders, [])
+            .With(x =>x.PolicyHolders, [_validPolicyHolder])
+            .With(x => x.PolicyAddress, _validAddressDto)
             .With(x => x.Amount, 2.789m)
             .Create();
         
-        var validator = Substitute.For<IValidator<SellPolicyCommand>>();
-        validator.ValidateAsync(command).Returns(new ValidationResult());
-        var useCase = new SellPolicyUseCase(validator);
-        
-        var result = await useCase.Execute(command);
+        var result = await _useCase.Execute(command);
         
         Assert.Null(result.Data);
         Assert.NotNull(result.Error);
         Assert.Equal(ErrorType.Domain, result.Error.Type);
         Assert.Equal("Amount cannot have more than 2 decimal places.", result.Error.Message);
+    }
+
+    [Fact]
+    public async Task SellPolicy_ShouldReturnDomainError_IfPolicyAddressIsInvalid()
+    {
+        var invalidAddress = new AddressDto
+        {
+            AddressLine1 = "",
+            AddressLine2 = "",
+            AddressLine3 = "",
+            PostCode = "",
+        };
+        var command = new WeInsureFixture()
+            .Build<SellPolicyCommand>()
+            .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
+            .With(x =>x.PolicyHolders, [_validPolicyHolder])
+            .With(x => x.Amount, 2.78m)
+            .With(x => x.PolicyAddress, invalidAddress)
+            .Create();
+        
+        var result = await _useCase.Execute(command);
+
+        Assert.Null(result.Data);
+        Assert.NotNull(result.Error);
+        Assert.Equal(ErrorType.Domain, result.Error.Type);
+        Assert.Equal("AddressLine1 is required", result.Error.Message);
     }
     
     [Fact]
@@ -61,13 +106,10 @@ public class SellPolicyUseCaseTests
             .Build<SellPolicyCommand>()
             .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
             .With(x =>x.PolicyHolders, [invalidPolicyHolder])
+            .With(x => x.PolicyAddress, _validAddressDto)
             .Create();
         
-        var validator = Substitute.For<IValidator<SellPolicyCommand>>();
-        validator.ValidateAsync(command).Returns(new ValidationResult());
-        var useCase = new SellPolicyUseCase(validator);
-        
-        var result = await useCase.Execute(command);
+        var result = await _useCase.Execute(command);
         
         Assert.Null(result.Data);
         Assert.NotNull(result.Error);
@@ -88,18 +130,14 @@ public class SellPolicyUseCaseTests
             .Build<SellPolicyCommand>()
             .With(x => x.StartDate, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10)))
             .With(x =>x.PolicyHolders, tooManyPolicyHolders.ToList())
+            .With(x => x.PolicyAddress, _validAddressDto)
             .Create();
         
-        var validator = Substitute.For<IValidator<SellPolicyCommand>>();
-        validator.ValidateAsync(command).Returns(new ValidationResult());
-        var useCase = new SellPolicyUseCase(validator);
-        
-        var result = await useCase.Execute(command);
+        var result = await _useCase.Execute(command);
         
         Assert.Null(result.Data);
         Assert.NotNull(result.Error);
         Assert.Equal(ErrorType.Domain, result.Error.Type);
         Assert.Equal("Policy must have at least 1 policy holder and no more than 3.", result.Error.Message);
     }
-
 }

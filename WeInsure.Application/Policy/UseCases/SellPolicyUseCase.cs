@@ -30,6 +30,16 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
         {
             return Result<SoldPolicy>.Failure(paidPrice.Error);
         }
+        
+        var address = Address.Create(
+            command.PolicyAddress.AddressLine1, 
+            command.PolicyAddress.AddressLine2, 
+            command.PolicyAddress.AddressLine3, 
+            command.PolicyAddress.PostCode);
+        if (!address.IsSuccess)
+        {
+            return Result<SoldPolicy>.Failure(address.Error);
+        }
 
         var policyHolders = CreatePolicyHolders(command);
         if (!policyHolders.IsSuccess)
