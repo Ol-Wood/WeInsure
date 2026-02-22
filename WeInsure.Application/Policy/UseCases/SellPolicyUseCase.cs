@@ -2,6 +2,7 @@ using FluentValidation;
 using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.UseCases.Interfaces;
+using WeInsure.Domain.Entities;
 using WeInsure.Domain.Shared;
 using WeInsure.Domain.ValueObjects;
 
@@ -9,8 +10,6 @@ namespace WeInsure.Application.Policy.UseCases;
 
 public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellPolicyUseCase
 {
-    private const int PolicyMaxDaysInAdvance = 60;
-    
     public async Task<Result<SoldPolicy>> Execute(SellPolicyCommand command)
     {
         var validationResult = await validator.ValidateAsync(command);
@@ -32,7 +31,7 @@ public class SellPolicyUseCase(IValidator<SellPolicyCommand> validator) : ISellP
         }
         
         var policyHolders = command.PolicyHolders
-            .Select(ph => new PolicyHolder(ph.FirstName, ph.LastName, ph.DateOfBirth))
+            .Select(ph => PolicyHolder.Create(ph.FirstName, ph.LastName, ph.DateOfBirth))
             .ToArray();
 
         var policy = Domain.Entities.Policy.Create("Ref", command.StartDate, policyHolders, policyPrice.Data);

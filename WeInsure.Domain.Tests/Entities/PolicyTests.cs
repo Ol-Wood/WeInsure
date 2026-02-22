@@ -14,8 +14,8 @@ public class PolicyTests
     // Policy holders must be at least 16 by start date
     // Auto renewal policies can't use cheque
 
-    private readonly PolicyHolder _eligiblePolicyHolder = 
-        new("John", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 1)));
+    private readonly PolicyHolder _eligiblePolicyHolder =
+        PolicyHolder.Create("John", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 1)));
 
 
     [Fact]
@@ -52,7 +52,7 @@ public class PolicyTests
     public void Policy_Create_ShouldReturnDomainError_WhenAnyPolicyHolderIsNotEligibleAge()
     {
         var startDate = DateOnly.FromDateTime(new DateTime(2000, 1, 1));
-        var unEligiblePolicyHolder = new PolicyHolder("Jane", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 2)));
+        var unEligiblePolicyHolder = PolicyHolder.Create("Jane", "Doe", DateOnly.FromDateTime(new DateTime(1984, 1, 2)));
         var policyHolders = new[]
         {
             _eligiblePolicyHolder,
