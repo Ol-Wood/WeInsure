@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 using WeInsure.API.Controllers;
-using WeInsure.Application.Policy.Dtos;
 using WeInsure.Application.Policy.Mappers;
 using WeInsure.Application.Policy.UseCases;
 using WeInsure.Application.Policy.UseCases.Interfaces;
@@ -36,6 +36,18 @@ public class GetPolicyFeatureTests
         var objectResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equivalent(policy.ToDto(), objectResult.Value);
     }
+    
+    [Fact]
+    public async Task GetPolicyFeature_Returns404NotFound_WhenPolicyNotFound()
+    {
+        var policyReference = PolicyReference.Create().Value;
+        _policyRepository.GetByReference(policyReference).ReturnsNull();
+
+        var result = await _controller.GetPolicy(policyReference);
+
+        Assert.IsType<NotFoundResult>(result);
+    }
+
 
     private static Domain.Entities.Policy CreatePolicy()
     {
