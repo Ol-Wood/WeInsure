@@ -30,4 +30,9 @@ public class PolicyController(ISellPolicyUseCase sellPolicyUseCase) : Controller
             _ => StatusCode(500)
         };
     }
+
+    public async Task<ActionResult> GetPolicy(string policyReferenceValue)
+    {
+        throw new NotImplementedException();
+    }
 }
