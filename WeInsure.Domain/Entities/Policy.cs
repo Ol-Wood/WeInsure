@@ -18,6 +18,9 @@ public class Policy
     public IReadOnlyCollection<PolicyHolder> PolicyHolders { get; private set; }
     public InsuredProperty InsuredProperty { get; private set; }
     public Payment Payment { get; private set; }
+    public bool AutoRenew { get; private set; }
+    
+    public bool Canceled { get; private set; }
 
     private Policy(
         Guid id,
@@ -39,6 +42,7 @@ public class Policy
         PolicyHolders = policyHolders.ToArray();
         Payment = payment;
         InsuredProperty = insuredProperty;
+        AutoRenew = autoRenew;
     }
 
     public static Result<Policy> Create(
