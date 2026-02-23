@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using WeInsure.API.Controllers;
+using WeInsure.Application.Policy.UseCases;
 using WeInsure.Application.Policy.UseCases.Interfaces;
 using WeInsure.Domain.ValueObjects;
 
@@ -12,7 +13,7 @@ public class GetPolicyFeatureTests
 
     public GetPolicyFeatureTests()
     {
-        _controller = new PolicyController(Substitute.For<ISellPolicyUseCase>());
+        _controller = new PolicyController(Substitute.For<ISellPolicyUseCase>(), new GetPolicyUseCase());
     }
     
     [Fact]

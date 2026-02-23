@@ -7,7 +7,7 @@ namespace WeInsure.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PolicyController(ISellPolicyUseCase sellPolicyUseCase) : ControllerBase
+public class PolicyController(ISellPolicyUseCase sellPolicyUseCase, IGetPolicyUseCase getPolicyUseCase) : ControllerBase
 {
     
     [HttpPost("sell")]
@@ -31,8 +31,18 @@ public class PolicyController(ISellPolicyUseCase sellPolicyUseCase) : Controller
         };
     }
 
-    public async Task<ActionResult> GetPolicy(string policyReferenceValue)
+    [HttpPost("{policyReference}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> GetPolicy(string policyReference)
     {
-        throw new NotImplementedException();
+        var result = await getPolicyUseCase.Execute(policyReference);
+
+        if (result is null)
+        {
+            return NotFound();
+        }
+        
+        return Ok(result);
     }
 }
