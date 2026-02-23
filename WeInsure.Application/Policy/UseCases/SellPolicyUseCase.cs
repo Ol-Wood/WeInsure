@@ -22,56 +22,30 @@ public class SellPolicyUseCase(
     {
         var validationResult = await validator.ValidateAsync(command);
         if (!validationResult.IsValid)
-        {
             return Result<SoldPolicy>.Failure(validationResult.ToValidationError());
-        }
 
         var policyId = idGenerator.Generate();
         var policyPrice = Money.Create(command.Amount).OrThrow();
         var paidPrice = Money.Create(command.Payment.Amount).OrThrow();
-
-        var addressDto = command.PolicyAddress;
-        var address = Address.Create(
-                addressDto.AddressLine1,
-                addressDto.AddressLine2,
-                addressDto.AddressLine3,
-                addressDto.PostCode)
-            .OrThrow();
-
+        var address = Address.Create(command.PolicyAddress.AddressLine1, command.PolicyAddress.AddressLine2, 
+                command.PolicyAddress.AddressLine3, command.PolicyAddress.PostCode).OrThrow();
         var property = InsuredProperty.Create(idGenerator.Generate(), policyId, address);
 
         var policyHolders = CreatePolicyHolders(command, policyId);
         if (!policyHolders.IsSuccess)
-        {
             return Result<SoldPolicy>.Failure(policyHolders.Error);
-        }
 
-        var payment = Payment.Create(
-            idGenerator.Generate(),
-            policyId,
-            command.Payment.PaymentType,
-            paidPrice,
-            command.Payment.PaymentReference);
+        var payment = Payment.Create(idGenerator.Generate(), policyId, 
+            command.Payment.PaymentType, paidPrice, command.Payment.PaymentReference);
         if (!payment.IsSuccess)
-        {
             return Result<SoldPolicy>.Failure(payment.Error);
-        }
 
         var policyReference = await policyReferenceGenerator.Generate();
-        var policy = PolicyEntity.Create(
-            policyId,
-            policyReference,
-            command.StartDate,
-            command.PolicyType,
-            policyHolders.Data,
-            policyPrice,
-            property,
-            payment.Data);
+        var policy = PolicyEntity.Create(policyId, policyReference, command.StartDate, 
+            command.PolicyType, policyHolders.Data, policyPrice, property, payment.Data);
         if (!policy.IsSuccess)
-        {
             return Result<SoldPolicy>.Failure(policy.Error);
-        }
-
+        
         await policyRepository.Add(policy.Data);
 
         return Result.Success(new SoldPolicy(policyId, policyReference.Value));
