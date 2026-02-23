@@ -10,7 +10,6 @@ public record Address
         AddressLine2 = addressLine2;
         AddressLine3 = addressLine3;
         PostCode = postcode;
-        
     }
 
     public string AddressLine1 { get; private set; }

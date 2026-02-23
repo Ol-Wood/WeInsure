@@ -1,6 +1,8 @@
+using AutoFixture;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
+using TestUtils.AutoFixture;
 using WeInsure.API.Controllers;
 using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.Dtos;
@@ -74,7 +76,7 @@ public class PolicyControllerTests
     public async Task GetPolicy_Returns200WithPolicy_WhenUseCaseReturnsSuccess()
     {
         const string policyReference = "policyReference";
-        var policy = new PolicyDto();
+        var policy = new WeInsureFixture().Create<PolicyDto>();
         _getPolicyUseCase.Execute(policyReference).Returns(policy);
         
         var result = await _policyController.GetPolicy(policyReference);

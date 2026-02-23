@@ -1,5 +1,6 @@
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
+using WeInsure.Application.Policy.Mappers;
 using WeInsure.Application.Policy.UseCases;
 using WeInsure.Domain.Entities;
 using WeInsure.Domain.Enums;
@@ -39,7 +40,7 @@ public class GetPolicyUseCaseTests
 
         var result = await _useCase.Execute(reference);
 
-        Assert.NotNull(result);
+        Assert.Equivalent(policy.ToDto(), result);
     }
 
     private static Domain.Entities.Policy CreatePolicy()
