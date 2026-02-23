@@ -19,8 +19,16 @@ public class Policy
     public InsuredProperty InsuredProperty { get; private set; }
     public Payment Payment { get; private set; }
 
-    private Policy(Guid id, PolicyReference reference, DateOnly startDate, PolicyType policyType, PolicyHolder[] policyHolders,
-        Money price, Payment payment, InsuredProperty insuredProperty)
+    private Policy(
+        Guid id,
+        PolicyReference reference,
+        DateOnly startDate,
+        PolicyType policyType,
+        PolicyHolder[] policyHolders,
+        Money price,
+        Payment payment,
+        InsuredProperty insuredProperty,
+        bool autoRenew)
     {
         Id = id;
         Reference = reference;
@@ -41,7 +49,8 @@ public class Policy
         PolicyHolder[] policyHolders,
         Money price,
         InsuredProperty insuredProperty,
-        Payment payment)
+        Payment payment,
+        bool autoRenew)
     {
         if (policyHolders.Length is 0 or > 3)
         {
@@ -65,7 +74,8 @@ public class Policy
             return Result<Policy>.Failure(Error.Domain("Policy type is not defined."));
         }
 
-        return Result<Policy>.Success(new Policy(id, reference, startDate, policyType, policyHolders, price, payment, insuredProperty));
+        return Result<Policy>.Success(new Policy(id, reference, startDate, policyType, policyHolders, price, payment,
+            insuredProperty, autoRenew));
     }
 
     private static bool IsPolicyHolderOldEnough(PolicyHolder policyHolder, DateOnly startDate)

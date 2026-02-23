@@ -29,7 +29,8 @@ public class PolicyTests
             policyHolders,
             CreateMoney(20),
             CreateInsuredProperty(),
-            CreatePayment());
+            CreatePayment(),
+            true);
 
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -53,7 +54,8 @@ public class PolicyTests
             policyHolders,
             CreateMoney(20),
             CreateInsuredProperty(),
-            CreatePayment());
+            CreatePayment(),
+            true);
 
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -82,7 +84,8 @@ public class PolicyTests
             policyHolders,
             CreateMoney(20),
             CreateInsuredProperty(),
-            CreatePayment());
+            CreatePayment(),
+            true);
 
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -108,7 +111,8 @@ public class PolicyTests
             policyHolders,
             CreateMoney(20),
             CreateInsuredProperty(),
-            CreatePayment());
+            CreatePayment(),
+            true);
 
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -132,7 +136,8 @@ public class PolicyTests
             policyHolders,
             CreateMoney(20),
             CreateInsuredProperty(),
-            CreatePayment());
+            CreatePayment(),
+            true);
 
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -162,7 +167,8 @@ public class PolicyTests
             policyHolders,
             price,
             insuredProperty,
-            payment);
+            payment,
+            true);
 
         Assert.True(policy.IsSuccess);
         Assert.Null(policy.Error);

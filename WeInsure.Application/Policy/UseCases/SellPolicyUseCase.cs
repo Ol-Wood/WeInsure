@@ -41,8 +41,16 @@ public class SellPolicyUseCase(
             return Result<SoldPolicy>.Failure(payment.Error);
 
         var policyReference = await policyReferenceGenerator.Generate();
-        var policy = PolicyEntity.Create(policyId, policyReference, command.StartDate, 
-            command.PolicyType, policyHolders.Data, policyPrice, property, payment.Data);
+        var policy = PolicyEntity.Create(
+            policyId, 
+            policyReference, 
+            command.StartDate, 
+            command.PolicyType,
+            policyHolders.Data,
+            policyPrice, 
+            property, 
+            payment.Data,
+            command.AutoRenew);
         if (!policy.IsSuccess)
             return Result<SoldPolicy>.Failure(policy.Error);
         
