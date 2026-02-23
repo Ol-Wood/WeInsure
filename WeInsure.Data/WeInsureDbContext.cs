@@ -78,17 +78,21 @@ public class WeInsureDbContext : DbContext
             builder.Property(p => p.StartDate).IsRequired();
             builder.Property(p => p.EndDate).IsRequired();
             builder.Property(p => p.PolicyType).IsRequired();
-            
+
+            builder.OwnsOne(p => p.Reference, reference =>
+            {
+                reference.Property(p => p.Value)
+                    .IsRequired()
+                    .HasColumnName("Reference")
+                    .HasMaxLength(50);
+            });
+                
             builder.OwnsOne(p => p.Price, money =>
                 money.Property(p => p.Amount)
                     .HasColumnName("Price")
                     .HasPrecision(18, 2)
                     .IsRequired());
-            
-            builder.Property(p => p.Reference)
-                .IsRequired()
-                .HasMaxLength(50);
-            
+        
             builder.HasOne(p => p.Payment)
                 .WithOne()
                 .HasForeignKey<Payment>(p => p.PolicyId);

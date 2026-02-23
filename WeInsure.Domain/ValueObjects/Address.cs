@@ -4,6 +4,7 @@ namespace WeInsure.Domain.ValueObjects;
 
 public record Address
 {
+    private Address(){}
     private Address(string addressLine1, string? addressLine2, string? addressLine3, string postcode)
     {
         AddressLine1 = addressLine1;

@@ -12,6 +12,7 @@ public class Payment
     public Money Amount { get; private set; }
     public string Reference { get; private set; }
 
+    private Payment(){}
     private Payment(Guid id, Guid policyId, PaymentType paymentType, Money amount, string reference)
     {
         Id = id;

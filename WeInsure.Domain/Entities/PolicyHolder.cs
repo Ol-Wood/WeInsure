@@ -5,6 +5,7 @@ namespace WeInsure.Domain.Entities;
 public record PolicyHolder
 {
 
+    private PolicyHolder(){}
     private PolicyHolder(Guid id, Guid policyId, string firstName, string lastName, DateOnly dateOfBirth)
     {
         Id = id;

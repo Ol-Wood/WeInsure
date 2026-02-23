@@ -8,6 +8,7 @@ public class InsuredProperty
     public Guid PolicyId { get; private set; }
     public Address Address { get; private set; }
 
+    private InsuredProperty(){}
     private InsuredProperty(Guid id, Guid policyId, Address address)
     {
         Id = id;

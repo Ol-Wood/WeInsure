@@ -22,6 +22,7 @@ public class Policy
     
     public bool Canceled { get; private set; }
 
+    private Policy(){}
     private Policy(
         Guid id,
         PolicyReference reference,
