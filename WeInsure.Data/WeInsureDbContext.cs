@@ -95,8 +95,5 @@ public class WeInsureDbContext(DbContextOptions<WeInsureDbContext> options) : Db
                 .WithOne()
                 .HasForeignKey(x => x.PolicyId);
         });
-
-
-
     }
 }

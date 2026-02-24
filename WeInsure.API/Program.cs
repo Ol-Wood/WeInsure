@@ -27,8 +27,15 @@ builder.Services.AddSingleton<IIdGenerator, IdGenerator>();
 
 builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
 
-builder.Services.AddDatabase(builder.Configuration.GetConnectionString("Database"));
+var dbConnectionString = builder.Configuration.GetConnectionString("WeInsure");
 
+if (builder.Environment.IsDevelopment() && string.IsNullOrEmpty(dbConnectionString))
+{
+    const Environment.SpecialFolder folder = Environment.SpecialFolder.LocalApplicationData;
+    dbConnectionString = $"Data Source={Path.Join(Environment.GetFolderPath(folder), "weinsure.db")}";
+}
+
+builder.Services.AddDatabase(dbConnectionString);
 
 var app = builder.Build();
 
