@@ -1,5 +1,6 @@
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
+using TestUtils.TestData;
 using WeInsure.Application.Policy.Commands;
 using WeInsure.Application.Policy.UseCases;
 using WeInsure.Domain.Repositories;
@@ -12,6 +13,7 @@ public class RenewPolicyUseCastTests
 {
     private readonly RenewPolicyUseCase _useCase;
     private readonly IPolicyRepository _policyRepository = Substitute.For<IPolicyRepository>();
+    private readonly string _policyReference = PolicyReference.Create().Value;
 
     public RenewPolicyUseCastTests()
     {
@@ -21,12 +23,24 @@ public class RenewPolicyUseCastTests
     [Fact]
     public async Task RenewPolicy_ReturnsNotFoundError_WhenPolicyDoesNotExist()
     {
-        var policyRef = PolicyReference.Create();
-        _policyRepository.GetByReference(policyRef.Value).ReturnsNull();
+        _policyRepository.GetByReference(_policyReference).ReturnsNull();
 
-        var result = await _useCase.Execute(new RenewPolicyCommand(policyRef.Value));
+        var result = await _useCase.Execute(new RenewPolicyCommand(_policyReference));
         
         Assert.False(result.IsSuccess);
-        Assert.Equivalent(Error.NotFound($"Policy {policyRef.Value} does not exist."), result.Error);
+        Assert.Equivalent(Error.NotFound("Policy does not exist."), result.Error);
+    }
+
+
+    [Fact]
+    public async Task RenewPolicy_ReturnsDomainError_WhenPolicyCannotBeRenewed()
+    {
+        var policy = PolicyDataGenerator.CreatePolicy();
+        _policyRepository.GetByReference(_policyReference).Returns(policy);
+        
+        var result = await _useCase.Execute(new RenewPolicyCommand(_policyReference));
+        
+        Assert.False(result.IsSuccess);
+        Assert.Equivalent(Error.Domain("Too early for policy renewal"), result.Error);
     }
 }

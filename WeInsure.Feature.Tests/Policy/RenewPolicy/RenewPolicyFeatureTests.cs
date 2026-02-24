@@ -3,6 +3,7 @@ using NSubstitute;
 using WeInsure.API.Controllers;
 using WeInsure.Application.Policy.UseCases;
 using WeInsure.Application.Policy.UseCases.Interfaces;
+using WeInsure.Domain.Repositories;
 using WeInsure.Domain.ValueObjects;
 
 namespace WeInsure.Feature.Tests.Policy.RenewPolicy;
@@ -18,7 +19,7 @@ public class RenewPolicyFeatureTests
     public RenewPolicyFeatureTests()
     {
         _controller = new PolicyController(Substitute.For<ISellPolicyUseCase>(), Substitute.For<IGetPolicyUseCase>(),
-            new RenewPolicyUseCase());
+            new RenewPolicyUseCase(Substitute.For<IPolicyRepository>()));
     }
 
     [Fact]

@@ -3,11 +3,11 @@ using WeInsure.Domain.Enums;
 using WeInsure.Domain.Shared;
 using WeInsure.Domain.ValueObjects;
 
-namespace WeInsure.Feature.Tests.TestData;
+namespace TestUtils.TestData;
 
 public static class PolicyDataGenerator
 {
-    public static Domain.Entities.Policy CreatePolicy()
+    public static Policy CreatePolicy()
     {
         var policyId = Guid.NewGuid();
         var policyReference = PolicyReference.Create();
@@ -18,7 +18,7 @@ public static class PolicyDataGenerator
         var insuredProperty = InsuredProperty.Create(Guid.NewGuid(), policyId, address);
         var payment = Payment.Create(Guid.NewGuid(), policyId, PaymentType.Card, moneyAmount, "REF").OrThrow();
 
-        var policy = Domain.Entities.Policy.Create(policyId, policyReference, DateOnly.FromDateTime(DateTime.UtcNow),
+        var policy = Policy.Create(policyId, policyReference, DateOnly.FromDateTime(DateTime.UtcNow),
             PolicyType.Household, [policyHolder], moneyAmount, insuredProperty, payment, true);
 
         return policy.OrThrow();

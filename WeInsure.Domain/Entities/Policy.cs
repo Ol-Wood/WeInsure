@@ -94,4 +94,9 @@ public class Policy
         var maximumAdvanceStartDate = currentDate.AddDays(PolicyMaxDaysInAdvance);
         return startDate >= currentDate && startDate <= maximumAdvanceStartDate;
     }
+
+    public Result<Policy> Renew(DateOnly dateOfRenewal)
+    {
+        throw new NotImplementedException();
+    }
 }

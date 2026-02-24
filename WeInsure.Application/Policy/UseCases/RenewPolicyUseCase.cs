@@ -14,8 +14,14 @@ public class RenewPolicyUseCase(IPolicyRepository policyRepository) : IRenewPoli
 
         if (policy is null)
         {
-            return Result<SoldPolicy>.Failure(Error.NotFound($"Policy {command.PolicyReference} does not exist."));
+            return Result<SoldPolicy>.Failure(Error.NotFound("Policy does not exist."));
         }
+        
+        var dateOfRenewal = DateOnly.FromDateTime(DateTime.UtcNow);
+        var renewedPolicy = policy.Renew(dateOfRenewal);
+        
+        if (!renewedPolicy.IsSuccess)
+            return Result<SoldPolicy>.Failure(renewedPolicy.Error);
 
         throw new NotImplementedException();
     }
