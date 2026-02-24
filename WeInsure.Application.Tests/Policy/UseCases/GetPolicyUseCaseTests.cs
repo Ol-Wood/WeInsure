@@ -55,7 +55,7 @@ public class GetPolicyUseCaseTests
         var payment = Payment.Create(Guid.NewGuid(), policyId, PaymentType.Card, moneyAmount, "REF").OrThrow();
 
         var policy = Domain.Entities.Policy.Create(policyId, policyReference, DateOnly.FromDateTime(DateTime.UtcNow),
-            PolicyType.Household, [policyHolder], moneyAmount, insuredProperty, payment, true);
+            PolicyType.Household, [policyHolder], moneyAmount, insuredProperty, payment, true, DateOnly.FromDateTime(DateTime.UtcNow));
 
         return policy.OrThrow();
     }

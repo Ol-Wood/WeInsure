@@ -22,10 +22,11 @@ builder.Services.AddSingleton<IValidator<SellPolicyCommand>, SellPolicyCommandVa
 builder.Services.AddScoped<IGetPolicyUseCase, GetPolicyUseCase>();
 builder.Services.AddScoped<ISellPolicyUseCase, SellPolicyUseCase>();
 builder.Services.AddScoped<IPolicyReferenceGenerator, PolicyReferenceGenerator>();
+builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
 
 builder.Services.AddSingleton<IIdGenerator, IdGenerator>();
+builder.Services.AddSingleton(TimeProvider.System);
 
-builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
 
 var dbConnectionString = builder.Configuration.GetConnectionString("WeInsure");
 

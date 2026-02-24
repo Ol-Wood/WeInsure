@@ -22,7 +22,7 @@ public class GetPolicyFeatureTests
     {
         _controller =
             new PolicyController(Substitute.For<ISellPolicyUseCase>(), new GetPolicyUseCase(_policyRepository),
-                Substitute.For<RenewPolicyUseCase>());
+                Substitute.For<IRenewPolicyUseCase>());
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class GetPolicyFeatureTests
         var payment = Payment.Create(Guid.NewGuid(), policyId, PaymentType.Card, moneyAmount, "REF").OrThrow();
 
         var policy = Domain.Entities.Policy.Create(policyId, policyReference, DateOnly.FromDateTime(DateTime.UtcNow),
-            PolicyType.Household, [policyHolder], moneyAmount, insuredProperty, payment, true);
+            PolicyType.Household, [policyHolder], moneyAmount, insuredProperty, payment, true, DateOnly.FromDateTime(DateTime.UtcNow));
 
         return policy.OrThrow();
     }

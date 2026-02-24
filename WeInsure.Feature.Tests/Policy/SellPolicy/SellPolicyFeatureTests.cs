@@ -16,6 +16,7 @@ public class SellPolicyFeatureTests
 {
     private readonly PolicyController _controller;
     private readonly IPolicyRepository _policyRepository = Substitute.For<IPolicyRepository>();
+    private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
 
     private readonly SellPolicyCommand _validCommand = new()
     {
@@ -49,11 +50,12 @@ public class SellPolicyFeatureTests
 
     public SellPolicyFeatureTests()
     {
+        _timeProvider.GetUtcNow().Returns(DateTime.UtcNow);
         var validator = new SellPolicyCommandValidator();
         var sellPolicyUseCase = new SellPolicyUseCase(validator, new IdGenerator(), _policyRepository,
-            new PolicyReferenceGenerator(_policyRepository));
+            new PolicyReferenceGenerator(_policyRepository), _timeProvider);
         _controller = new PolicyController(sellPolicyUseCase, Substitute.For<IGetPolicyUseCase>(),
-            Substitute.For<RenewPolicyUseCase>());
+            Substitute.For<IRenewPolicyUseCase>());
     }
 
     [Fact]

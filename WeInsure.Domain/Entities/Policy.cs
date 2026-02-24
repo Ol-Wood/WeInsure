@@ -55,7 +55,8 @@ public class Policy
         Money price,
         InsuredProperty insuredProperty,
         Payment payment,
-        bool autoRenew)
+        bool autoRenew,
+        DateOnly currentDate)
     {
         if (policyHolders.Length is 0 or > 3)
         {
@@ -69,7 +70,7 @@ public class Policy
                 Error.Domain("All policy holders must be at least 16 years of age by the policy start date."));
         }
 
-        if (!IsStartDateValid(startDate))
+        if (!IsStartDateValid(startDate, currentDate))
         {
             return Result<Policy>.Failure(Error.Domain("Policy start date can't be more than 60 days in the future"));
         }
@@ -88,15 +89,37 @@ public class Policy
         return policyHolder.DateOfBirth.AddYears(16) <= startDate;
     }
 
-    private static bool IsStartDateValid(DateOnly startDate)
+    private static bool IsStartDateValid(DateOnly startDate, DateOnly currentDate)
     {
-        var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
         var maximumAdvanceStartDate = currentDate.AddDays(PolicyMaxDaysInAdvance);
         return startDate >= currentDate && startDate <= maximumAdvanceStartDate;
     }
 
-    public Result<Policy> Renew(DateOnly dateOfRenewal)
+    public Result<Policy> Renew(Guid renewedPolicyId, PolicyReference renewedPolicyReference, DateOnly dateOfRenewal)
     {
-        throw new NotImplementedException();
+        if (EndDate.AddDays(-30) > dateOfRenewal)
+        {
+            return Result<Policy>.Failure(Error.Domain("Too early for policy renewal"));
+        }
+
+        if (dateOfRenewal > EndDate)
+        {
+            return Result<Policy>.Failure(Error.Domain("Policy has expired and cannot be renewed"));
+        }
+
+        var renewedPolicy = Create(
+            renewedPolicyId,
+            renewedPolicyReference,
+            StartDate.AddYears(1),
+            PolicyType,
+            PolicyHolders.ToArray(),
+            Price,
+            InsuredProperty,
+            Payment,
+            AutoRenew,
+            dateOfRenewal
+        ).OrThrow();
+        
+        return Result<Policy>.Success(renewedPolicy);
     }
 }

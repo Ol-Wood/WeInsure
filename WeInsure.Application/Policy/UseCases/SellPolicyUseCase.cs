@@ -16,7 +16,8 @@ public class SellPolicyUseCase(
     IValidator<SellPolicyCommand> validator,
     IIdGenerator idGenerator,
     IPolicyRepository policyRepository,
-    IPolicyReferenceGenerator policyReferenceGenerator) : ISellPolicyUseCase
+    IPolicyReferenceGenerator policyReferenceGenerator,
+    TimeProvider timeProvider) : ISellPolicyUseCase
 {
     public async Task<Result<SoldPolicy>> Execute(SellPolicyCommand command)
     {
@@ -50,7 +51,8 @@ public class SellPolicyUseCase(
             policyPrice, 
             property, 
             payment.Data,
-            command.AutoRenew);
+            command.AutoRenew,
+            DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime));
         if (!policy.IsSuccess)
             return Result<SoldPolicy>.Failure(policy.Error);
         

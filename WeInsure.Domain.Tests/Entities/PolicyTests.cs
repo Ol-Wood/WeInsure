@@ -30,7 +30,8 @@ public class PolicyTests
             CreateMoney(20),
             CreateInsuredProperty(),
             CreatePayment(),
-            true);
+            true,
+            DateOnly.FromDateTime(DateTime.UtcNow));
 
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -55,7 +56,8 @@ public class PolicyTests
             CreateMoney(20),
             CreateInsuredProperty(),
             CreatePayment(),
-            true);
+            true,
+            DateOnly.FromDateTime(DateTime.UtcNow));
 
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -85,7 +87,8 @@ public class PolicyTests
             CreateMoney(20),
             CreateInsuredProperty(),
             CreatePayment(),
-            true);
+            true,
+            DateOnly.FromDateTime(DateTime.UtcNow));
 
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -112,7 +115,8 @@ public class PolicyTests
             CreateMoney(20),
             CreateInsuredProperty(),
             CreatePayment(),
-            true);
+            true,
+            DateOnly.FromDateTime(DateTime.UtcNow));
 
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -137,7 +141,8 @@ public class PolicyTests
             CreateMoney(20),
             CreateInsuredProperty(),
             CreatePayment(),
-            true);
+            true,
+            DateOnly.FromDateTime(DateTime.UtcNow));
 
         Assert.False(policy.IsSuccess);
         Assert.Null(policy.Data);
@@ -168,7 +173,8 @@ public class PolicyTests
             price,
             insuredProperty,
             payment,
-            true);
+            true,
+            DateOnly.FromDateTime(DateTime.UtcNow));
 
         Assert.True(policy.IsSuccess);
         Assert.Null(policy.Error);
@@ -180,6 +186,87 @@ public class PolicyTests
         Assert.Equal(policyType, data.PolicyType);
         Assert.Equal(payment, data.Payment);
         Assert.Equal(price, data.Price);
+    }
+
+
+    [Fact]
+    public void Policy_Renew_ReturnsError_WhenPolicyIsBeingRenewedTooEarly()
+    {
+        var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        var policy = Policy.Create(
+            _policyId,
+            PolicyReference.Create(),
+           currentDate,
+            PolicyType.Household,
+            [_eligiblePolicyHolder],
+            CreateMoney(20),
+            CreateInsuredProperty(),
+            CreatePayment(),
+            true,
+            DateOnly.FromDateTime(DateTime.UtcNow)).OrThrow();
+        
+        var result = policy.Renew(Guid.CreateVersion7(), PolicyReference.Create(), currentDate);
+        
+        Assert.False(result.IsSuccess);
+        Assert.Equal(ErrorType.Domain, result.Error.Type);
+        Assert.Equal("Too early for policy renewal", result.Error.Message);
+    }
+    
+    [Fact]
+    public void Policy_Renew_ReturnsError_WhenPolicyHasAlreadyExpired()
+    {
+        var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        var policyStateDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-2));
+        var policy = Policy.Create(
+            _policyId,
+            PolicyReference.Create(),
+            policyStateDate,
+            PolicyType.Household,
+            [_eligiblePolicyHolder],
+            CreateMoney(20),
+            CreateInsuredProperty(),
+            CreatePayment(),
+            true,
+            policyStateDate).OrThrow();
+        
+        var result = policy.Renew(Guid.CreateVersion7(), PolicyReference.Create(), currentDate);
+        
+        Assert.False(result.IsSuccess);
+        Assert.Equal(ErrorType.Domain, result.Error.Type);
+        Assert.Equal("Policy has expired and cannot be renewed", result.Error.Message);
+    }
+
+
+    [Fact]
+    public void Public_Renew_ReturnsRenewedPolicy_WhenSuccessfullyRenewed()
+    {
+        var renewedPolicyId = Guid.CreateVersion7();
+        var renewedPolicyReference = PolicyReference.Create();
+        var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        var policyStateDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1));
+        var policy = Policy.Create(
+            _policyId,
+            PolicyReference.Create(),
+            policyStateDate,
+            PolicyType.Household,
+            [_eligiblePolicyHolder],
+            CreateMoney(20),
+            CreateInsuredProperty(),
+            CreatePayment(),
+            true,
+            policyStateDate).OrThrow();
+        
+        var result = policy.Renew(renewedPolicyId, renewedPolicyReference, currentDate);
+        
+        Assert.True(result.IsSuccess);
+        var renewedPolicy = result.Data;
+        Assert.Equal(renewedPolicyId, renewedPolicy.Id);
+        Assert.Equal(policy.PolicyType, renewedPolicy.PolicyType);
+        Assert.Equal(_eligiblePolicyHolder, renewedPolicy.PolicyHolders.Single());
+        Assert.Equal(policy.AutoRenew, renewedPolicy.AutoRenew);
+        Assert.Equal(renewedPolicyReference.Value, renewedPolicy.Reference.Value);
+        Assert.Equal(policy.StartDate.AddYears(1), renewedPolicy.StartDate);
+        Assert.Equal(policy.EndDate.AddYears(1), renewedPolicy.EndDate);
     }
 
     private static Money CreateMoney(decimal amount)

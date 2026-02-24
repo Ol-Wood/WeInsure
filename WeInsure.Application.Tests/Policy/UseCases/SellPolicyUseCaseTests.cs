@@ -24,6 +24,7 @@ public class SellPolicyUseCaseTests
     private readonly IIdGenerator _idGenerator = Substitute.For<IIdGenerator>();
     private readonly IPolicyRepository _policyRepository = Substitute.For<IPolicyRepository>();
     private readonly IPolicyReferenceGenerator _policyReferenceGenerator = Substitute.For<IPolicyReferenceGenerator>();
+    private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
 
     private readonly AddressDto _validAddressDto = new()
     {
@@ -42,10 +43,11 @@ public class SellPolicyUseCaseTests
 
     public SellPolicyUseCaseTests()
     {
+        _timeProvider.GetUtcNow().Returns(DateTime.UtcNow);
         _validator.ValidateAsync(Arg.Any<SellPolicyCommand>()).Returns(new ValidationResult());
         _idGenerator.Generate().Returns(_policyId);
         _policyReferenceGenerator.Generate().Returns(_policyReference);
-        _useCase = new SellPolicyUseCase(_validator, _idGenerator, _policyRepository, _policyReferenceGenerator);
+        _useCase = new SellPolicyUseCase(_validator, _idGenerator, _policyRepository, _policyReferenceGenerator, _timeProvider);
     }
 
     [Fact]
