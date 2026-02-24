@@ -34,6 +34,11 @@ public class Payment
         
         return Result.Success(new Payment(id, policyId, paymentType, amount, reference));
     }
+
+    public Payment CopyToNewPolicy(Guid newId, Guid policyId)
+    {
+        return Create(newId, policyId, PaymentType, Amount, Reference).OrThrow();
+    }
     
 }
     

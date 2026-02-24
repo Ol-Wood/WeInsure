@@ -190,7 +190,7 @@ public class PolicyTests
 
 
     [Fact]
-    public void Policy_Renew_ReturnsError_WhenPolicyIsBeingRenewedTooEarly()
+    public void Policy_CanRenew_ReturnsError_WhenPolicyIsBeingRenewedTooEarly()
     {
         var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
         var policy = Policy.Create(
@@ -205,7 +205,7 @@ public class PolicyTests
             true,
             DateOnly.FromDateTime(DateTime.UtcNow)).OrThrow();
         
-        var result = policy.Renew(Guid.CreateVersion7(), PolicyReference.Create(), currentDate);
+        var result = policy.CanRenew( currentDate);
         
         Assert.False(result.IsSuccess);
         Assert.Equal(ErrorType.Domain, result.Error.Type);
@@ -229,7 +229,7 @@ public class PolicyTests
             true,
             policyStateDate).OrThrow();
         
-        var result = policy.Renew(Guid.CreateVersion7(), PolicyReference.Create(), currentDate);
+        var result = policy.CanRenew(currentDate);
         
         Assert.False(result.IsSuccess);
         Assert.Equal(ErrorType.Domain, result.Error.Type);
@@ -238,10 +238,8 @@ public class PolicyTests
 
 
     [Fact]
-    public void Public_Renew_ReturnsRenewedPolicy_WhenSuccessfullyRenewed()
+    public void Public_Renew_ReturnsSuccess_WhenCanBeRenewed()
     {
-        var renewedPolicyId = Guid.CreateVersion7();
-        var renewedPolicyReference = PolicyReference.Create();
         var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
         var policyStateDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1));
         var policy = Policy.Create(
@@ -256,17 +254,9 @@ public class PolicyTests
             true,
             policyStateDate).OrThrow();
         
-        var result = policy.Renew(renewedPolicyId, renewedPolicyReference, currentDate);
+        var result = policy.CanRenew(currentDate);
         
         Assert.True(result.IsSuccess);
-        var renewedPolicy = result.Data;
-        Assert.Equal(renewedPolicyId, renewedPolicy.Id);
-        Assert.Equal(policy.PolicyType, renewedPolicy.PolicyType);
-        Assert.Equal(_eligiblePolicyHolder, renewedPolicy.PolicyHolders.Single());
-        Assert.Equal(policy.AutoRenew, renewedPolicy.AutoRenew);
-        Assert.Equal(renewedPolicyReference.Value, renewedPolicy.Reference.Value);
-        Assert.Equal(policy.StartDate.AddYears(1), renewedPolicy.StartDate);
-        Assert.Equal(policy.EndDate.AddYears(1), renewedPolicy.EndDate);
     }
 
     private static Money CreateMoney(decimal amount)

@@ -20,4 +20,9 @@ public class InsuredProperty
     {
         return new InsuredProperty(id, policyId, address);
     }
+
+    public InsuredProperty CopyToNewPolicy(Guid newId, Guid newPolicyId)
+    {
+        return Create(newId, newPolicyId, Address);
+    }
 }

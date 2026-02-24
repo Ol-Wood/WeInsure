@@ -17,7 +17,7 @@ public class Policy
     public PolicyReference Reference { get; private set; }
     public IReadOnlyCollection<PolicyHolder> PolicyHolders { get; private set; }
     public InsuredProperty InsuredProperty { get; private set; }
-    public Payment Payment { get; private set; }
+    public Payment? Payment { get; private set; }
     public bool AutoRenew { get; private set; }
     public bool HasClaims { get; set; }
     public bool Canceled { get; private set; }
@@ -30,7 +30,7 @@ public class Policy
         PolicyType policyType,
         PolicyHolder[] policyHolders,
         Money price,
-        Payment payment,
+        Payment? payment,
         InsuredProperty insuredProperty,
         bool autoRenew)
     {
@@ -54,7 +54,7 @@ public class Policy
         PolicyHolder[] policyHolders,
         Money price,
         InsuredProperty insuredProperty,
-        Payment payment,
+        Payment? payment,
         bool autoRenew,
         DateOnly currentDate)
     {
@@ -95,7 +95,7 @@ public class Policy
         return startDate >= currentDate && startDate <= maximumAdvanceStartDate;
     }
 
-    public Result<Policy> Renew(Guid renewedPolicyId, PolicyReference renewedPolicyReference, DateOnly dateOfRenewal)
+    public Result CanRenew(DateOnly dateOfRenewal)
     {
         if (EndDate.AddDays(-30) > dateOfRenewal)
         {
@@ -106,20 +106,7 @@ public class Policy
         {
             return Result<Policy>.Failure(Error.Domain("Policy has expired and cannot be renewed"));
         }
-
-        var renewedPolicy = Create(
-            renewedPolicyId,
-            renewedPolicyReference,
-            StartDate.AddYears(1),
-            PolicyType,
-            PolicyHolders.ToArray(),
-            Price,
-            InsuredProperty,
-            Payment,
-            AutoRenew,
-            dateOfRenewal
-        ).OrThrow();
         
-        return Result<Policy>.Success(renewedPolicy);
+        return Result.Success();
     }
 }

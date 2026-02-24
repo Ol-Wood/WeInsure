@@ -41,4 +41,9 @@ public record PolicyHolder
 
         return Result.Success(new PolicyHolder(id, policyId, firstName, lastName, dateOfBirth));
     }
+    
+    public PolicyHolder CopyToNewPolicy(Guid newId, Guid newPolicyId)
+    {
+        return Create(newId, newPolicyId, FirstName, LastName, DateOfBirth).OrThrow();
+    }
 }
