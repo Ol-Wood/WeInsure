@@ -22,6 +22,7 @@ public class PolicyRepository(WeInsureDbContext dbContext) : IPolicyRepository
     public Task<Policy?> GetByReference(string reference)
     {
         return dbContext.Policies
+            .AsNoTracking()
             .Include(p => p.InsuredProperty)
             .Include(p => p.Payment)
             .Include(p => p.PolicyHolders)

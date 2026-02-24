@@ -59,16 +59,16 @@ public class SellPolicyFeatureTests
     }
 
     [Fact]
-    public async Task SellPolicyShould_SuccessfullyCreatePolicy()
+    public async Task SellPolicy_Returns201Created_WhenSuccessfullySoldPolicy()
     {
         var result = await _controller.SellPolicy(_validCommand);
 
-        Assert.IsType<OkObjectResult>(result);
+        Assert.IsType<CreatedResult>(result);
     }
 
 
     [Fact]
-    public async Task SellPolicyShould_ReturnBadRequest_WhenValidationFails()
+    public async Task SellPolicyShould_Return400BadRequest_WhenValidationFails()
     {
         var invalidCommand = _validCommand with { Amount = -100 };
 

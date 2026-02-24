@@ -21,6 +21,7 @@ builder.Services.AddControllers()
 builder.Services.AddSingleton<IValidator<SellPolicyCommand>, SellPolicyCommandValidator>();
 builder.Services.AddScoped<IGetPolicyUseCase, GetPolicyUseCase>();
 builder.Services.AddScoped<ISellPolicyUseCase, SellPolicyUseCase>();
+builder.Services.AddScoped<IRenewPolicyUseCase, RenewPolicyUseCase>();
 builder.Services.AddScoped<IPolicyReferenceGenerator, PolicyReferenceGenerator>();
 builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
 

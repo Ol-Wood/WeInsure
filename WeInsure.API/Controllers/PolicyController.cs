@@ -13,9 +13,8 @@ public class PolicyController(
     IRenewPolicyUseCase renewPolicyUseCase) : ControllerBase
 {
     [HttpPost("sell")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> SellPolicy([FromBody] SellPolicyCommand command)
     {
         var result = await sellPolicyUseCase.Execute(command);
@@ -30,8 +29,7 @@ public class PolicyController(
             };
         }
         
-        return Ok(result.Data);
-       
+        return Created($"/policy/{result.Data.PolicyReference}", result.Data);
     }
 
     [HttpGet("{policyReference}")]
@@ -49,10 +47,13 @@ public class PolicyController(
         return Ok(result);
     }
 
-    [HttpPost("{policyReference}")]
-    public async Task<ActionResult> RenewPolicy(string reference)
+    [HttpPost("renew/{policyReference}")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> RenewPolicy(string policyReference)
     {
-        var command = new RenewPolicyCommand(reference);
+        var command = new RenewPolicyCommand(policyReference);
         var result = await renewPolicyUseCase.Execute(command);
 
         if (!result.IsSuccess)
@@ -66,7 +67,6 @@ public class PolicyController(
             };
         }
         
-        
-        return Ok(result.Data);
+        return Created($"/policy/{result.Data.PolicyReference}", result.Data);
     }
 }

@@ -25,7 +25,7 @@ public class PolicyControllerTests
     }
 
     [Fact]
-    public async Task SellPolicy_Returns200WithCreatedPolicyInfo_WhenCreationSuccessful()
+    public async Task SellPolicy_Returns201WithCreatedPolicyInfo_WhenCreationSuccessful()
     {
         var command = CreateSellPolicyCommand();
         var policyId = Guid.NewGuid();
@@ -37,7 +37,7 @@ public class PolicyControllerTests
         var result = await _policyController.SellPolicy(command);
         
         var expectedResponse = new SoldPolicy(policyId, policyReference);
-        var okResult = Assert.IsType<OkObjectResult>(result);
+        var okResult = Assert.IsType<CreatedResult>(result);
         Assert.Equal(expectedResponse, okResult.Value);
     }
     
@@ -129,7 +129,7 @@ public class PolicyControllerTests
     
         
     [Fact]
-    public async Task RenewPolicy_Returns200WithRenewedPolicyInfo_WhenUseCaseReturnsSuccessfully()
+    public async Task RenewPolicy_Returns201WithRenewedPolicyInfo_WhenUseCaseReturnsSuccessfully()
     {
         const string policyReference = "policyReference";
         var renewedPolicy = new SoldPolicy(Guid.NewGuid(), policyReference);
@@ -139,7 +139,7 @@ public class PolicyControllerTests
         
         var result = await _policyController.RenewPolicy(policyReference);
         
-        var okObject = Assert.IsType<OkObjectResult>(result);
+        var okObject = Assert.IsType<CreatedResult>(result);
         Assert.Equal(renewedPolicy, okObject.Value);
     }
 

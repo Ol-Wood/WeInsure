@@ -64,14 +64,14 @@ public class RenewPolicyFeatureTests
     }
 
     [Fact]
-    public async Task RenewPolicy_Returns200_WithNewPolicyDetails_WhenSuccessful()
+    public async Task RenewPolicy_Returns201_WithNewPolicyDetails_WhenSuccessful()
     {
         var policy = CreatePolicy(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(20)));
         _policyRepository.GetByReference(Arg.Any<string>()).Returns(policy);
 
         var result = await _controller.RenewPolicy(policy.Reference.Value);
 
-        var okResult = Assert.IsType<OkObjectResult>(result);
+        var okResult = Assert.IsType<CreatedResult>(result);
         var soldPolicy = Assert.IsType<SoldPolicy>(okResult.Value);
         Assert.NotEqual(Guid.Empty, soldPolicy.PolicyId);
         Assert.NotNull(soldPolicy.PolicyReference);

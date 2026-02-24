@@ -46,6 +46,8 @@ public class RenewPolicyUseCase(
             dateOfRenewal
         ).OrThrow();
         
+        await policyRepository.Add(renewedPolicy);
+        
         return Result<SoldPolicy>.Success(new SoldPolicy(renewedPolicy.Id, renewedPolicy.Reference.Value));
     }
 
