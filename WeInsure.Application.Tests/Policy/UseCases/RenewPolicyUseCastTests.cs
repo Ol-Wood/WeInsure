@@ -25,14 +25,14 @@ public class RenewPolicyUseCastTests
         _idGenerator.Generate().Returns(Guid.CreateVersion7());
         _useCase = new RenewPolicyUseCase(_policyRepository, _policyReferenceGenerator, _idGenerator);
     }
-    
+
     [Fact]
     public async Task RenewPolicy_ReturnsNotFoundError_WhenPolicyDoesNotExist()
     {
         _policyRepository.GetByReference(_policyReference).ReturnsNull();
 
         var result = await _useCase.Execute(new RenewPolicyCommand(_policyReference));
-        
+
         Assert.False(result.IsSuccess);
         Assert.Equivalent(Error.NotFound("Policy does not exist."), result.Error);
     }
@@ -43,9 +43,9 @@ public class RenewPolicyUseCastTests
     {
         var policy = CreatePolicy();
         _policyRepository.GetByReference(_policyReference).Returns(policy);
-        
+
         var result = await _useCase.Execute(new RenewPolicyCommand(_policyReference));
-        
+
         Assert.False(result.IsSuccess);
         Assert.Equivalent(Error.Domain("Too early for policy renewal"), result.Error);
     }
@@ -61,12 +61,15 @@ public class RenewPolicyUseCastTests
         _idGenerator.Generate().Returns(renewedPolicyId);
         _policyRepository.GetByReference(_policyReference).Returns(policy);
         var result = await _useCase.Execute(new RenewPolicyCommand(_policyReference));
-        
+
+       await  _policyRepository.Received(1).Add(Arg.Is<Domain.Entities.Policy>(x => 
+           x.Id == renewedPolicyId && 
+           x.Reference == renewedPolicyReference));
         Assert.True(result.IsSuccess);
         Assert.Equal(renewedPolicyReference.Value, result.Data.PolicyReference);
         Assert.Equal(renewedPolicyId, result.Data.PolicyId);
     }
-    
+
     private static Domain.Entities.Policy CreatePolicy(DateOnly? startDate = null, DateOnly? currentDate = null)
     {
         var policyId = Guid.NewGuid();
@@ -79,16 +82,16 @@ public class RenewPolicyUseCastTests
         var payment = Payment.Create(Guid.NewGuid(), policyId, PaymentType.Card, moneyAmount, "REF").OrThrow();
 
         var policy = Domain.Entities.Policy.Create(
-            policyId, 
+            policyId,
             policyReference,
             startDate ?? DateOnly.FromDateTime(DateTime.UtcNow),
-            PolicyType.Household, 
+            PolicyType.Household,
             [policyHolder],
-            moneyAmount, 
-            insuredProperty, 
-            payment, 
+            moneyAmount,
+            insuredProperty,
+            payment,
             true,
-           currentDate ?? DateOnly.FromDateTime(DateTime.UtcNow));
+            currentDate ?? DateOnly.FromDateTime(DateTime.UtcNow));
 
         return policy.OrThrow();
     }

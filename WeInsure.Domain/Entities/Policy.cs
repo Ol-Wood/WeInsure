@@ -97,6 +97,12 @@ public class Policy
 
     public Result CanRenew(DateOnly dateOfRenewal)
     {
+
+        if (Canceled)
+        {
+            return Result<Policy>.Failure(Error.Domain("Policy has expired and cannot be renewed"));
+        }
+        
         if (EndDate.AddDays(-30) > dateOfRenewal)
         {
             return Result<Policy>.Failure(Error.Domain("Too early for policy renewal"));
