@@ -19,7 +19,7 @@ public class Policy
     public InsuredProperty InsuredProperty { get; private set; }
     public Payment Payment { get; private set; }
     public bool AutoRenew { get; private set; }
-    
+    public bool HasClaims { get; set; }
     public bool Canceled { get; private set; }
 
     private Policy(){}
