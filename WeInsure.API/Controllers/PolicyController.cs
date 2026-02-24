@@ -31,7 +31,7 @@ public class PolicyController(ISellPolicyUseCase sellPolicyUseCase, IGetPolicyUs
         };
     }
 
-    [HttpPost("{policyReference}")]
+    [HttpGet("{policyReference}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> GetPolicy(string policyReference)

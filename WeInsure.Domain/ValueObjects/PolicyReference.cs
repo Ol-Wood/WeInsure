@@ -18,4 +18,9 @@ public class PolicyReference
         
         return new PolicyReference(reference);
     }
+
+    public static PolicyReference FromExisting(string reference)
+    {
+        return new PolicyReference(reference);
+    }
 }

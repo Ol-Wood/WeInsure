@@ -81,6 +81,10 @@ namespace WeInsure.Data.Migrations
                     b.Property<int>("PolicyType")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("TEXT");
 
@@ -111,14 +115,9 @@ namespace WeInsure.Data.Migrations
                     b.Property<Guid>("PolicyId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("PolicyId1")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("PolicyId");
-
-                    b.HasIndex("PolicyId1");
 
                     b.ToTable("PolicyHolders");
                 });
@@ -216,43 +215,17 @@ namespace WeInsure.Data.Migrations
                                 .HasForeignKey("PolicyId");
                         });
 
-                    b.OwnsOne("WeInsure.Domain.ValueObjects.PolicyReference", "Reference", b1 =>
-                        {
-                            b1.Property<Guid>("PolicyId")
-                                .HasColumnType("TEXT");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(50)
-                                .HasColumnType("TEXT")
-                                .HasColumnName("Reference");
-
-                            b1.HasKey("PolicyId");
-
-                            b1.ToTable("Policies");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PolicyId");
-                        });
-
                     b.Navigation("Price")
-                        .IsRequired();
-
-                    b.Navigation("Reference")
                         .IsRequired();
                 });
 
             modelBuilder.Entity("WeInsure.Domain.Entities.PolicyHolder", b =>
                 {
                     b.HasOne("WeInsure.Domain.Entities.Policy", null)
-                        .WithMany()
+                        .WithMany("PolicyHolders")
                         .HasForeignKey("PolicyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("WeInsure.Domain.Entities.Policy", null)
-                        .WithMany("PolicyHolders")
-                        .HasForeignKey("PolicyId1");
                 });
 
             modelBuilder.Entity("WeInsure.Domain.Entities.Policy", b =>

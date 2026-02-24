@@ -1,26 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using WeInsure.Domain.Entities;
+using WeInsure.Domain.ValueObjects;
 
 namespace WeInsure.Data;
 
-public class WeInsureDbContext : DbContext
+public class WeInsureDbContext(DbContextOptions<WeInsureDbContext> options) : DbContext(options)
 {
     public DbSet<Policy> Policies { get; set; }
     public DbSet<PolicyHolder> PolicyHolders { get; set; }
     public DbSet<InsuredProperty> InsuredProperties { get; set; }
     public DbSet<Payment> Payments { get; set; }
-    
-    private string DbPath { get; }
 
-    public WeInsureDbContext()
-    {
-        const Environment.SpecialFolder folder = Environment.SpecialFolder.LocalApplicationData;
-        var path = Environment.GetFolderPath(folder);
-        DbPath = Path.Join(path, "blogging.db");
-    }
-    
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite($"Data Source={DbPath}");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +18,7 @@ public class WeInsureDbContext : DbContext
         {
             builder.HasKey(p => p.Id);
             builder.Property(p => p.Reference).IsRequired().HasMaxLength(50);
+            builder.Property(p => p.PolicyId).IsRequired();
             builder.Property(x => x.PaymentType)
                 .HasConversion<string>()
                 .IsRequired()
@@ -42,6 +33,7 @@ public class WeInsureDbContext : DbContext
         modelBuilder.Entity<InsuredProperty>(builder =>
         {
             builder.HasKey(p => p.Id);
+            builder.Property(p => p.PolicyId).IsRequired();
             builder.OwnsOne(p => p.Address, address =>
             {
                 address.Property(a => a.AddressLine1)
@@ -60,6 +52,7 @@ public class WeInsureDbContext : DbContext
         modelBuilder.Entity<PolicyHolder>(builder =>
         {
             builder.HasKey(p => p.Id);
+            builder.Property(p => p.PolicyId).IsRequired();
             builder.Property(p => p.FirstName)
                 .IsRequired()
                 .HasMaxLength(50);
@@ -79,13 +72,10 @@ public class WeInsureDbContext : DbContext
             builder.Property(p => p.EndDate).IsRequired();
             builder.Property(p => p.PolicyType).IsRequired();
 
-            builder.OwnsOne(p => p.Reference, reference =>
-            {
-                reference.Property(p => p.Value)
-                    .IsRequired()
-                    .HasColumnName("Reference")
-                    .HasMaxLength(50);
-            });
+            builder.Property(x => x.Reference)
+                .HasConversion(
+                    r => r.Value,
+                    r => PolicyReference.FromExisting(r));
                 
             builder.OwnsOne(p => p.Price, money =>
                 money.Property(p => p.Amount)
@@ -101,7 +91,7 @@ public class WeInsureDbContext : DbContext
                 .WithOne()
                 .HasForeignKey<InsuredProperty>(x => x.PolicyId);
             builder
-                .HasMany<PolicyHolder>()
+                .HasMany( p => p.PolicyHolders)
                 .WithOne()
                 .HasForeignKey(x => x.PolicyId);
         });

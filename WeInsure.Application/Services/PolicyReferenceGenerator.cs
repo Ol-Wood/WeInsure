@@ -24,7 +24,7 @@ public class PolicyReferenceGenerator(IPolicyRepository policyRepository) : IPol
             }
             
             var policyReference = PolicyReference.Create();
-            if (await policyRepository.Exists(policyReference))
+            if (await policyRepository.Exists(policyReference.Value))
             {
                 retryCount = --retryCount;
                 continue;

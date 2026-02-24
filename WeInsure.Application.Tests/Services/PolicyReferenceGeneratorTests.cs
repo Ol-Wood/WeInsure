@@ -13,36 +13,36 @@ public class PolicyReferenceGeneratorTests
     [Fact]
     public async Task Generate_ShouldGeneratePolicyReference_AndIfUniqueThenReturn()
     {
-        _policyRepository.Exists(Arg.Any<PolicyReference>()).Returns(false);
+        _policyRepository.Exists(Arg.Any<string>()).Returns(false);
         var generator = new PolicyReferenceGenerator(_policyRepository);
         
         var result = await generator.Generate();
         
-        await _policyRepository.Received(1).Exists(Arg.Any<PolicyReference>());
+        await _policyRepository.Received(1).Exists(Arg.Any<string>());
         Assert.IsType<PolicyReference>(result);
     }
     
     [Fact]
     public async Task Generate_ShouldGeneratePolicyReference_AndIfNotUniqueThenRetry()
     {
-        _policyRepository.Exists(Arg.Any<PolicyReference>()).Returns(true, false);
+        _policyRepository.Exists(Arg.Any<string>()).Returns(true, false);
         var generator = new PolicyReferenceGenerator(_policyRepository);
         
         var result = await generator.Generate();
         
-        await _policyRepository.Received(2).Exists(Arg.Any<PolicyReference>());
+        await _policyRepository.Received(2).Exists(Arg.Any<string>());
         Assert.IsType<PolicyReference>(result);
     }
 
     [Fact]
     public async Task Generate_ShouldGeneratePolicyReference_IfNotUniqueAfter3Attempts_ThrowsException()
     {
-        _policyRepository.Exists(Arg.Any<PolicyReference>()).Returns(true, true, true, false);
+        _policyRepository.Exists(Arg.Any<string>()).Returns(true, true, true, false);
         var generator = new PolicyReferenceGenerator(_policyRepository);
         
         var act = () => generator.Generate();
         
         await Assert.ThrowsAsync<PolicyReferenceGenerationException>(act);
-        await _policyRepository.Received(3).Exists(Arg.Any<PolicyReference>());
+        await _policyRepository.Received(3).Exists(Arg.Any<string>());
     }
 }

@@ -20,7 +20,7 @@ namespace WeInsure.Data.Migrations
                     EndDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
                     PolicyType = table.Column<int>(type: "INTEGER", nullable: false),
                     Price = table.Column<decimal>(type: "TEXT", precision: 18, scale: 2, nullable: false),
-                    Reference = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Reference = table.Column<string>(type: "TEXT", nullable: false),
                     AutoRenew = table.Column<bool>(type: "INTEGER", nullable: false),
                     Canceled = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false)
                 },
@@ -80,8 +80,7 @@ namespace WeInsure.Data.Migrations
                     PolicyId = table.Column<Guid>(type: "TEXT", nullable: false),
                     FirstName = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     LastName = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    DateOfBirth = table.Column<DateOnly>(type: "TEXT", nullable: false),
-                    PolicyId1 = table.Column<Guid>(type: "TEXT", nullable: true)
+                    DateOfBirth = table.Column<DateOnly>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -92,11 +91,6 @@ namespace WeInsure.Data.Migrations
                         principalTable: "Policies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PolicyHolders_Policies_PolicyId1",
-                        column: x => x.PolicyId1,
-                        principalTable: "Policies",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -115,11 +109,6 @@ namespace WeInsure.Data.Migrations
                 name: "IX_PolicyHolders_PolicyId",
                 table: "PolicyHolders",
                 column: "PolicyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PolicyHolders_PolicyId1",
-                table: "PolicyHolders",
-                column: "PolicyId1");
         }
 
         /// <inheritdoc />
