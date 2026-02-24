@@ -12,4 +12,5 @@ public class Error
     
     public static Error Validation(params string[]? message) => new(string.Join(", ", message), ErrorType.Validation);
     public static Error Domain(string message) => new(message, ErrorType.Domain);
+    public static Error NotFound(string message) => new(message, ErrorType.NotFound);
 }

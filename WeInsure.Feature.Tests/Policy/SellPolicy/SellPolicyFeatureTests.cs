@@ -16,7 +16,9 @@ public class SellPolicyFeatureTests
 {
     private readonly PolicyController _controller;
     private readonly IPolicyRepository _policyRepository = Substitute.For<IPolicyRepository>();
-    private readonly SellPolicyCommand _validCommand = new(){
+
+    private readonly SellPolicyCommand _validCommand = new()
+    {
         Amount = 100,
         PolicyType = PolicyType.Household,
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
@@ -50,7 +52,8 @@ public class SellPolicyFeatureTests
         var validator = new SellPolicyCommandValidator();
         var sellPolicyUseCase = new SellPolicyUseCase(validator, new IdGenerator(), _policyRepository,
             new PolicyReferenceGenerator(_policyRepository));
-        _controller = new PolicyController(sellPolicyUseCase, Substitute.For<IGetPolicyUseCase>());
+        _controller = new PolicyController(sellPolicyUseCase, Substitute.For<IGetPolicyUseCase>(),
+            Substitute.For<RenewPolicyUseCase>());
     }
 
     [Fact]
@@ -66,9 +69,9 @@ public class SellPolicyFeatureTests
     public async Task SellPolicyShould_ReturnBadRequest_WhenValidationFails()
     {
         var invalidCommand = _validCommand with { Amount = -100 };
-        
+
         var result = await _controller.SellPolicy(invalidCommand);
-        
+
         Assert.IsType<BadRequestObjectResult>(result);
     }
 }

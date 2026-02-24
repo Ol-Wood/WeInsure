@@ -4,4 +4,5 @@ public enum ErrorType
 {
     Validation,
     Domain,
+    NotFound,
 }

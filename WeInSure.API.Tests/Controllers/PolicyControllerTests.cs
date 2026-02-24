@@ -16,11 +16,12 @@ public class PolicyControllerTests
 {
     private readonly ISellPolicyUseCase _sellPolicyUseCase = Substitute.For<ISellPolicyUseCase>();
     private readonly IGetPolicyUseCase _getPolicyUseCase = Substitute.For<IGetPolicyUseCase>();
+    private readonly IRenewPolicyUseCase _renewPolicyUseCase = Substitute.For<IRenewPolicyUseCase>();
     private readonly PolicyController _policyController;
 
     public PolicyControllerTests()
     {
-        _policyController = new PolicyController(_sellPolicyUseCase, _getPolicyUseCase);
+        _policyController = new PolicyController(_sellPolicyUseCase, _getPolicyUseCase, _renewPolicyUseCase);
     }
 
     [Fact]
@@ -94,6 +95,52 @@ public class PolicyControllerTests
         var result = await _policyController.GetPolicy(policyReference);
         
        Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public async Task RenewPolicy_Returns400WithErrorMessage_WhenUseCaseReturnsValidationError()
+    {
+        const string policyReference = "policyReference";
+        var error = Error.Validation("Error renewing policy");
+        _renewPolicyUseCase.
+            Execute(Arg.Is<RenewPolicyCommand>(x => x.PolicyReference == policyReference))
+            .Returns(Result<SoldPolicy>.Failure(error));
+        
+        var result = await _policyController.RenewPolicy(policyReference);
+        
+        var badResult = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(error.Message, badResult.Value);
+    }
+    
+    [Fact]
+    public async Task RenewPolicy_Returns404WithErrorMessage_WhenUseCaseReturnsNotFoundError()
+    {
+        const string policyReference = "policyReference";
+        var error = Error.NotFound("Policy not found");
+        _renewPolicyUseCase.
+            Execute(Arg.Is<RenewPolicyCommand>(x => x.PolicyReference == policyReference))
+            .Returns(Result<SoldPolicy>.Failure(error));
+        
+        var result = await _policyController.RenewPolicy(policyReference);
+        
+        var badResult = Assert.IsType<NotFoundObjectResult>(result);
+        Assert.Equal(error.Message, badResult.Value);
+    }
+    
+        
+    [Fact]
+    public async Task RenewPolicy_Returns200WithRenewedPolicyInfo_WhenUseCaseReturnsSuccessfully()
+    {
+        const string policyReference = "policyReference";
+        var renewedPolicy = new SoldPolicy(Guid.NewGuid(), policyReference);
+        _renewPolicyUseCase.
+            Execute(Arg.Is<RenewPolicyCommand>(x => x.PolicyReference == policyReference))
+            .Returns(Result<SoldPolicy>.Success(renewedPolicy));
+        
+        var result = await _policyController.RenewPolicy(policyReference);
+        
+        var okObject = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(renewedPolicy, okObject.Value);
     }
 
     private static SellPolicyCommand CreateSellPolicyCommand()

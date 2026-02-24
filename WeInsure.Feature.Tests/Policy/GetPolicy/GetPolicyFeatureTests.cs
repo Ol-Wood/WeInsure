@@ -21,7 +21,8 @@ public class GetPolicyFeatureTests
     public GetPolicyFeatureTests()
     {
         _controller =
-            new PolicyController(Substitute.For<ISellPolicyUseCase>(), new GetPolicyUseCase(_policyRepository));
+            new PolicyController(Substitute.For<ISellPolicyUseCase>(), new GetPolicyUseCase(_policyRepository),
+                Substitute.For<RenewPolicyUseCase>());
     }
 
     [Fact]
@@ -36,7 +37,7 @@ public class GetPolicyFeatureTests
         var objectResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equivalent(policy.ToDto(), objectResult.Value);
     }
-    
+
     [Fact]
     public async Task GetPolicyFeature_Returns404NotFound_WhenPolicyNotFound()
     {

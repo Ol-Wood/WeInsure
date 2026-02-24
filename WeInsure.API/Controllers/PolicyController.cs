@@ -7,9 +7,11 @@ namespace WeInsure.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PolicyController(ISellPolicyUseCase sellPolicyUseCase, IGetPolicyUseCase getPolicyUseCase) : ControllerBase
+public class PolicyController(
+    ISellPolicyUseCase sellPolicyUseCase,
+    IGetPolicyUseCase getPolicyUseCase,
+    IRenewPolicyUseCase renewPolicyUseCase) : ControllerBase
 {
-    
     [HttpPost("sell")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -18,17 +20,18 @@ public class PolicyController(ISellPolicyUseCase sellPolicyUseCase, IGetPolicyUs
     {
         var result = await sellPolicyUseCase.Execute(command);
 
-        if (result.IsSuccess)
+        if (!result.IsSuccess)
         {
-            return Ok(result.Data);
+            return result.Error?.Type switch
+            {
+                ErrorType.Validation => BadRequest(result.Error.Message),
+                ErrorType.Domain => BadRequest(result.Error.Message),
+                _ => StatusCode(500)
+            };
         }
-
-        return result.Error?.Type switch
-        {
-            ErrorType.Validation => BadRequest(result.Error.Message),
-            ErrorType.Domain => BadRequest(result.Error.Message),
-            _ => StatusCode(500)
-        };
+        
+        return Ok(result.Data);
+       
     }
 
     [HttpGet("{policyReference}")]
@@ -42,7 +45,28 @@ public class PolicyController(ISellPolicyUseCase sellPolicyUseCase, IGetPolicyUs
         {
             return NotFound();
         }
-        
+
         return Ok(result);
+    }
+
+    [HttpPost("{policyReference}")]
+    public async Task<ActionResult> RenewPolicy(string reference)
+    {
+        var command = new RenewPolicyCommand(reference);
+        var result = await renewPolicyUseCase.Execute(command);
+
+        if (!result.IsSuccess)
+        {
+            return result.Error.Type switch
+            {
+                ErrorType.Validation => BadRequest(result.Error.Message),
+                ErrorType.Domain => BadRequest(result.Error.Message),
+                ErrorType.NotFound => NotFound(result.Error.Message),
+                _ => StatusCode(500)
+            };
+        }
+        
+        
+        return Ok(result.Data);
     }
 }
